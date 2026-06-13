@@ -1,0 +1,447 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>แอดมิน — แก้ไขคอร์ส | HighBrainnet</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=Sarabun:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <link rel="stylesheet" href="../assets/css/styles.css" />
+</head>
+<body class="bg-slate-100">
+
+  <div class="min-h-screen flex">
+    <aside class="w-64 bg-slate-900 text-white flex-shrink-0 hidden lg:flex flex-col">
+      <a href="dashboard.html" class="flex items-center gap-2 p-5 border-b border-slate-800">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-orange-400 to-orange-600 grid place-items-center text-white font-extrabold">H</div>
+        <div><div class="font-bold">HighBrainnet</div><div class="text-xs text-slate-400">แอดมิน</div></div>
+      </a>
+      <nav class="sidenav flex-1 p-3 space-y-1 text-sm">
+        <a href="dashboard.html"><i data-lucide="layout-dashboard" class="w-4 h-4"></i> ภาพรวม</a>
+        <a href="courses.html"><i data-lucide="book-open" class="w-4 h-4"></i> จัดการคอร์ส</a>
+        <a href="course-edit.html" class="active"><i data-lucide="file-edit" class="w-4 h-4"></i> สร้าง / แก้ไขคอร์ส</a>
+        <a href="payments.html"><i data-lucide="banknote" class="w-4 h-4"></i> ตรวจสอบการชำระเงิน</a>
+        <a href="quiz-creator.html"><i data-lucide="clipboard-list" class="w-4 h-4"></i> สร้างข้อสอบ</a>
+      </nav>
+      <a href="#" data-logout class="m-3 btn btn-ghost text-slate-300 text-sm"><i data-lucide="log-out" class="w-4 h-4"></i> ออกจากระบบ</a>
+    </aside>
+
+    <div class="flex-1 min-w-0">
+      <header class="bg-white border-b border-slate-200 sticky top-0 z-30">
+        <div class="px-6 flex items-center justify-between h-16">
+          <div class="flex items-center gap-3 min-w-0">
+            <a href="courses.html" class="w-9 h-9 rounded-lg hover:bg-slate-100 grid place-items-center flex-shrink-0"><i data-lucide="chevron-left" class="w-5 h-5"></i></a>
+            <h1 id="pageTitle" class="font-bold text-lg truncate">แก้ไขคอร์ส</h1>
+          </div>
+          <a id="previewLink" href="#" target="_blank" class="btn btn-ghost text-sm"><i data-lucide="eye" class="w-4 h-4"></i> ดูหน้าเว็บ</a>
+        </div>
+      </header>
+
+      <main class="p-6">
+        <div data-tabs="edit" class="flex gap-1 border-b border-slate-200 mb-6 bg-white px-6 -mx-6 -mt-6 py-3">
+          <button data-tab="info"    class="tab-btn active">ข้อมูลทั่วไป</button>
+          <button data-tab="content" class="tab-btn">เนื้อหา &amp; บทเรียน</button>
+        </div>
+
+        <!-- INFO -->
+        <div data-panel="info" data-group="edit" class="tab-panel active grid lg:grid-cols-3 gap-6">
+          <form id="infoForm" class="lg:col-span-2 grid gap-5">
+            <div class="card p-6">
+              <h3 class="font-bold mb-4">ข้อมูลพื้นฐาน</h3>
+              <div class="grid gap-4">
+                <div>
+                  <label class="text-sm font-semibold mb-1 block">ชื่อคอร์ส</label>
+                  <input name="title" required class="w-full px-3 py-2 rounded-lg border border-slate-200"/>
+                </div>
+                <div>
+                  <label class="text-sm font-semibold mb-1 block">คำโปรย (subtitle)</label>
+                  <input name="subtitle" class="w-full px-3 py-2 rounded-lg border border-slate-200"/>
+                </div>
+                <div>
+                  <label class="text-sm font-semibold mb-1 block">คำอธิบาย</label>
+                  <textarea name="description" rows="4" class="w-full px-3 py-2 rounded-lg border border-slate-200"></textarea>
+                </div>
+              </div>
+            </div>
+            <div class="card p-6">
+              <h3 class="font-bold mb-4">URL &amp; รูปปก</h3>
+              <div class="grid gap-4">
+                <div>
+                  <label class="text-sm font-semibold mb-1 block">URL Slug</label>
+                  <input name="slug" class="w-full px-3 py-2 rounded-lg border border-slate-200 font-mono text-sm"/>
+                  <p class="text-xs text-slate-400 mt-1">a-z, 0-9 และ dash เท่านั้น</p>
+                </div>
+                <div>
+                  <label class="text-sm font-semibold mb-1 block">URL รูปปก</label>
+                  <input name="coverImageUrl" type="url" placeholder="https://..." class="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm"/>
+                </div>
+              </div>
+            </div>
+          </form>
+
+          <aside class="grid gap-5 h-fit">
+            <div class="card p-6 grid gap-4">
+              <h3 class="font-bold">ราคา &amp; การเผยแพร่</h3>
+              <div>
+                <label class="text-sm font-semibold mb-1 block">ราคา (บาท)</label>
+                <input form="infoForm" name="price" type="number" min="0" class="w-full px-3 py-2 rounded-lg border border-slate-200"/>
+              </div>
+              <div>
+                <label class="text-sm font-semibold mb-1 block">ระดับชั้น</label>
+                <select form="infoForm" name="levelId" id="levelSelect" class="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm"></select>
+              </div>
+              <div>
+                <label class="text-sm font-semibold mb-1 block">สถานะ</label>
+                <select form="infoForm" name="isVisible" class="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm">
+                  <option value="true">เผยแพร่</option>
+                  <option value="false">ไม่แสดง (ฉบับร่าง)</option>
+                </select>
+              </div>
+              <div class="text-xs text-slate-500" id="versionInfo"></div>
+              <button type="submit" form="infoForm" class="btn btn-primary w-full">บันทึกข้อมูล</button>
+            </div>
+          </aside>
+        </div>
+
+        <!-- CONTENT -->
+        <div data-panel="content" data-group="edit" class="tab-panel">
+          <input type="file" id="videoFileInput" accept="video/*" class="hidden"/>
+          <div class="card p-6">
+            <div class="flex items-center justify-between mb-4">
+              <h3 class="font-bold">โครงสร้างเนื้อหา</h3>
+              <button id="addChapterBtn" class="btn btn-primary text-sm"><i data-lucide="folder-plus" class="w-4 h-4"></i> เพิ่มบท</button>
+            </div>
+            <div id="chaptersWrap" class="space-y-3">
+              <div class="text-center text-slate-400 py-8">กำลังโหลด...</div>
+            </div>
+          </div>
+        </div>
+
+      </main>
+    </div>
+  </div>
+
+  <script>window.HBN_API_BASE = window.HBN_API_BASE || 'http://localhost:4000';</script>
+  <script src="../assets/js/api.js"></script>
+  <script src="../assets/js/cart.js"></script>
+  <script src="../assets/js/ui.js"></script>
+  <script src="../assets/js/main.js"></script>
+  <script>
+    (async function () {
+      const user = HBN.api.currentUser();
+      const courseId = new URLSearchParams(location.search).get('id');
+      if (!user || user.role !== 'ADMIN') {
+        location.href = '../login.html?back=' + encodeURIComponent('admin/course-edit.html' + location.search);
+        return;
+      }
+      if (!courseId) {
+        HBN.ui.toast('ไม่พบรหัสคอร์ส — กลับไปหน้าจัดการคอร์ส', 'error');
+        setTimeout(() => (location.href = 'courses.html'), 1200);
+        return;
+      }
+
+      const esc = (s = '') => String(s).replace(/[&<>"]/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+      const infoForm = document.getElementById('infoForm');
+
+      // ---------- INFO ----------
+      const { items: levels } = await HBN.api.get('/levels');
+      document.getElementById('levelSelect').innerHTML =
+        levels.map((l) => `<option value="${l.id}">${esc(l.name)}</option>`).join('');
+
+      async function loadInfo() {
+        const { course } = await HBN.api.get(`/admin/courses/${courseId}`);
+        document.getElementById('pageTitle').textContent = 'แก้ไขคอร์ส: ' + course.title;
+        document.getElementById('previewLink').href = `../course-detail.html?slug=${encodeURIComponent(course.slug)}`;
+        document.getElementById('versionInfo').textContent =
+          course.currentVersion?.versionLabel ? 'เวอร์ชันปัจจุบัน: ' + course.currentVersion.versionLabel : '';
+        infoForm.title.value = course.title || '';
+        infoForm.subtitle.value = course.subtitle || '';
+        infoForm.description.value = course.description || '';
+        infoForm.slug.value = course.slug || '';
+        infoForm.coverImageUrl.value = course.coverImageUrl || '';
+        infoForm.price.value = course.price ?? 0;
+        infoForm.levelId.value = course.levelId;
+        infoForm.isVisible.value = String(course.isVisible);
+      }
+
+      infoForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const fd = new FormData(infoForm);
+        const patch = {
+          title: fd.get('title'),
+          subtitle: fd.get('subtitle') || null,
+          description: fd.get('description') || null,
+          price: Number(fd.get('price')),
+          levelId: fd.get('levelId'),
+          isVisible: fd.get('isVisible') === 'true',
+        };
+        const slug = (fd.get('slug') || '').trim();
+        if (slug) patch.slug = slug;
+        const cover = (fd.get('coverImageUrl') || '').trim();
+        patch.coverImageUrl = cover || null;
+        try {
+          await HBN.api.patch(`/admin/courses/${courseId}`, patch);
+          HBN.ui.toast('บันทึกแล้ว ✅', 'success');
+          loadInfo();
+        } catch (err) { HBN.ui.toast(err.message, 'error'); }
+      });
+
+      // ---------- CONTENT ----------
+      const wrap = document.getElementById('chaptersWrap');
+
+      function fmtDur(sec) {
+        sec = Math.round(sec || 0);
+        const h = Math.floor(sec / 3600), m = Math.floor((sec % 3600) / 60), s = sec % 60;
+        const mm = String(m).padStart(h ? 2 : 1, '0'), ss = String(s).padStart(2, '0');
+        return h ? `${h}:${mm}:${ss}` : `${mm}:${ss}`;
+      }
+
+      function videoChip(l) {
+        if (!l.bunnyVideoId) return '<span class="badge badge-gray">ยังไม่มีวิดีโอ</span>';
+        const map = {
+          ready:      ['badge-green', 'พร้อมเล่น'],
+          processing: ['badge-blue',  'กำลังประมวลผล'],
+          uploading:  ['badge-blue',  'กำลังอัปโหลด'],
+          failed:     ['badge-red',   'ล้มเหลว'],
+        };
+        const [cls, label] = map[l.videoStatus] || ['badge-gray', l.videoStatus || '—'];
+        const dur = l.videoDuration ? ' · ' + fmtDur(l.videoDuration) : '';
+        return `<span class="badge ${cls}">${label}${dur}</span>`;
+      }
+
+      function videoButtons(l) {
+        if (!l.bunnyVideoId) {
+          return `<button data-upload="${l.id}" title="อัปโหลดวิดีโอ" class="w-8 h-8 grid place-items-center rounded hover:bg-slate-100"><i data-lucide="upload" class="w-4 h-4"></i></button>`;
+        }
+        return `
+          <button data-sync="${l.id}" title="ซิงค์สถานะจาก Bunny" class="w-8 h-8 grid place-items-center rounded hover:bg-slate-100"><i data-lucide="refresh-cw" class="w-4 h-4"></i></button>
+          <button data-rmvideo="${l.id}" title="ลบวิดีโอ" class="w-8 h-8 grid place-items-center rounded hover:bg-red-50 text-red-500"><i data-lucide="video-off" class="w-4 h-4"></i></button>`;
+      }
+
+      function lessonRow(l) {
+        if (l.isDeleted) {
+          return `
+            <div class="flex items-center gap-3 px-6 py-3 text-sm border-t border-slate-100 bg-slate-50/60" data-lesson-row="${l.id}">
+              <i data-lucide="eye-off" class="w-4 h-4 text-slate-300"></i>
+              <span class="flex-1 min-w-0 truncate text-slate-400 line-through">${esc(l.title)}</span>
+              <span class="badge badge-red">ถูกซ่อน</span>
+              <button data-restore-lesson="${l.id}" title="กู้คืน" class="btn btn-ghost text-sm text-green-600"><i data-lucide="rotate-ccw" class="w-4 h-4"></i> กู้คืน</button>
+            </div>`;
+        }
+        return `
+          <div class="border-t border-slate-100" data-lesson-row="${l.id}">
+            <div class="flex items-center gap-3 px-6 py-3 text-sm">
+              <i data-lucide="${l.bunnyVideoId ? 'play-circle' : 'circle-dashed'}" class="w-4 h-4 ${l.bunnyVideoId ? 'text-brand' : 'text-slate-300'}"></i>
+              <span class="flex-1 min-w-0 truncate ${l.isVisible ? '' : 'text-slate-400 italic'}">${esc(l.title)}${l.isVisible ? '' : ' (ซ่อน)'}</span>
+              ${videoChip(l)}
+              ${videoButtons(l)}
+              <span class="w-px h-5 bg-slate-200 mx-1"></span>
+              <button data-edit-lesson="${l.id}" title="แก้ชื่อ" class="w-8 h-8 grid place-items-center rounded hover:bg-slate-100"><i data-lucide="edit" class="w-4 h-4"></i></button>
+              <button data-del-lesson="${l.id}" title="ซ่อนบทเรียน" class="w-8 h-8 grid place-items-center rounded hover:bg-red-50 text-red-500"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+            </div>
+            <div data-progress="${l.id}" class="px-6 pb-3" style="display:none">
+              <div class="h-2 bg-slate-100 rounded overflow-hidden"><div data-bar class="h-2 bg-brand rounded transition-all" style="width:0%"></div></div>
+              <div class="text-xs text-slate-400 mt-1"><span data-msg>กำลังอัปโหลด...</span> <span data-pct>0%</span></div>
+            </div>
+          </div>`;
+      }
+
+      async function renderChapter(ch) {
+        // Soft-deleted chapter: compact row with a restore action (no lesson fetch)
+        if (ch.isDeleted) {
+          return `
+            <div class="border border-dashed border-slate-200 rounded-lg bg-slate-50/60">
+              <div class="flex items-center gap-3 p-4">
+                <div class="flex-1 min-w-0">
+                  <div class="font-bold truncate text-slate-400 line-through">${esc(ch.title)}</div>
+                  <div class="text-xs mt-0.5"><span class="badge badge-red">ถูกซ่อน</span></div>
+                </div>
+                <button data-restore-chapter="${ch.id}" class="btn btn-ghost text-sm text-green-600"><i data-lucide="rotate-ccw" class="w-4 h-4"></i> กู้คืน</button>
+              </div>
+            </div>`;
+        }
+
+        let lessons = [];
+        try { ({ items: lessons } = await HBN.api.get(`/admin/chapters/${ch.id}/lessons`)); } catch {}
+        const activeCount = lessons.filter((l) => !l.isDeleted).length;
+        return `
+          <div class="border border-slate-200 rounded-lg">
+            <div class="flex items-center gap-3 p-4 bg-slate-50">
+              <div class="flex-1 min-w-0">
+                <div class="font-bold truncate">${esc(ch.title)}${ch.isVisible ? '' : ' <span class="badge badge-gray">ซ่อน</span>'}</div>
+                <div class="text-xs text-slate-500">${activeCount} บทเรียน</div>
+              </div>
+              <button data-add-lesson="${ch.id}" class="btn btn-ghost text-sm"><i data-lucide="plus" class="w-4 h-4"></i> บทเรียน</button>
+              <button data-edit-chapter="${ch.id}" data-title="${esc(ch.title)}" class="w-8 h-8 grid place-items-center rounded hover:bg-slate-200"><i data-lucide="edit" class="w-4 h-4"></i></button>
+              <button data-del-chapter="${ch.id}" class="w-8 h-8 grid place-items-center rounded hover:bg-red-50 text-red-500"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+            </div>
+            <div>${lessons.map(lessonRow).join('') || '<div class="px-6 py-3 text-sm text-slate-400 border-t border-slate-100">ยังไม่มีบทเรียน</div>'}</div>
+          </div>`;
+      }
+
+      async function loadContent() {
+        wrap.innerHTML = '<div class="text-center text-slate-400 py-8">กำลังโหลด...</div>';
+        try {
+          const { items: chapters } = await HBN.api.get(`/admin/courses/${courseId}/chapters`);
+          if (!chapters.length) {
+            wrap.innerHTML = '<div class="text-center text-slate-400 py-8">ยังไม่มีบท — กด “เพิ่มบท” เพื่อเริ่ม</div>';
+            return;
+          }
+          wrap.innerHTML = (await Promise.all(chapters.map(renderChapter))).join('');
+          window.lucide?.createIcons();
+          bindContentActions();
+        } catch (e) {
+          wrap.innerHTML = `<div class="text-center text-red-500 py-8">${esc(e.message)}</div>`;
+        }
+      }
+
+      // ---------- video upload ----------
+      const fileInput = document.getElementById('videoFileInput');
+      let pendingLessonId = null;
+
+      function progressUI(lessonId) {
+        const box = wrap.querySelector(`[data-progress="${lessonId}"]`);
+        return {
+          show(msg) { if (box) { box.style.display = ''; box.querySelector('[data-msg]').textContent = msg || 'กำลังอัปโหลด...'; } },
+          set(ratio) {
+            if (!box) return;
+            const pct = Math.round(ratio * 100);
+            box.querySelector('[data-bar]').style.width = pct + '%';
+            box.querySelector('[data-pct]').textContent = pct + '%';
+          },
+          msg(text) { if (box) box.querySelector('[data-msg]').textContent = text; },
+        };
+      }
+
+      function putToBunny(url, accessKey, contentType, file, onProgress) {
+        return new Promise((resolve, reject) => {
+          const xhr = new XMLHttpRequest();
+          xhr.open('PUT', url);
+          xhr.setRequestHeader('AccessKey', accessKey);
+          if (contentType) xhr.setRequestHeader('Content-Type', contentType);
+          xhr.upload.onprogress = (e) => { if (e.lengthComputable) onProgress(e.loaded / e.total); };
+          xhr.onload = () => (xhr.status >= 200 && xhr.status < 300)
+            ? resolve()
+            : reject(new Error(`Bunny ตอบกลับ HTTP ${xhr.status}`));
+          xhr.onerror = () => reject(new Error('อัปโหลดไป Bunny ล้มเหลว (network/CORS)'));
+          xhr.send(file);
+        });
+      }
+
+      async function uploadVideo(lessonId, file) {
+        const ui = progressUI(lessonId);
+        ui.show('กำลังเตรียมพื้นที่อัปโหลด...');
+        ui.set(0);
+        try {
+          // 1) create Bunny video + get direct-upload target
+          const init = await HBN.api.post(`/admin/lessons/${lessonId}/video`, {});
+          const up = init.upload;
+          const isMock = !up?.url || up.url.includes('/library/MOCK/');
+
+          // 2) PUT raw bytes straight to Bunny (skipped in mock mode)
+          if (isMock) {
+            ui.msg('โหมดจำลอง Bunny — ข้ามการอัปโหลดไฟล์จริง');
+            ui.set(1);
+          } else {
+            ui.show('กำลังอัปโหลดวิดีโอ...');
+            await putToBunny(up.url, up.accessKey, up.contentType, file, (r) => ui.set(r));
+          }
+
+          // 3) sync status/duration back from Bunny
+          ui.msg('กำลังประมวลผล...');
+          await HBN.api.post(`/admin/lessons/${lessonId}/video/sync`, {});
+          HBN.ui.toast('อัปโหลดวิดีโอแล้ว ✅', 'success');
+          loadContent();
+        } catch (e) {
+          ui.msg('ผิดพลาด: ' + e.message);
+          HBN.ui.toast('อัปโหลดไม่สำเร็จ: ' + e.message, 'error');
+          // refresh so the row reflects the partially-created video (sync/delete become available)
+          setTimeout(loadContent, 1500);
+        }
+      }
+
+      fileInput.addEventListener('change', () => {
+        const file = fileInput.files[0];
+        const lessonId = pendingLessonId;
+        fileInput.value = '';
+        pendingLessonId = null;
+        if (file && lessonId) uploadVideo(lessonId, file);
+      });
+
+      function bindContentActions() {
+        wrap.querySelectorAll('[data-upload]').forEach((b) => b.onclick = () => {
+          pendingLessonId = b.dataset.upload;
+          fileInput.click();
+        });
+        wrap.querySelectorAll('[data-sync]').forEach((b) => b.onclick = async () => {
+          try {
+            const r = await HBN.api.post(`/admin/lessons/${b.dataset.sync}/video/sync`, {});
+            HBN.ui.toast('ซิงค์แล้ว — สถานะ: ' + (r.lesson?.videoStatus || '—'), 'success');
+            loadContent();
+          } catch (e) { HBN.ui.toast(e.message, 'error'); }
+        });
+        wrap.querySelectorAll('[data-rmvideo]').forEach((b) => b.onclick = async () => {
+          if (!confirm('ลบวิดีโอออกจากบทเรียนนี้? (ลบจาก Bunny ด้วย)')) return;
+          try {
+            await HBN.api.del(`/admin/lessons/${b.dataset.rmvideo}/video`);
+            HBN.ui.toast('ลบวิดีโอแล้ว', 'success');
+            loadContent();
+          } catch (e) { HBN.ui.toast(e.message, 'error'); }
+        });
+        wrap.querySelectorAll('[data-add-lesson]').forEach((b) => b.onclick = async () => {
+          const title = prompt('ชื่อบทเรียน:');
+          if (!title?.trim()) return;
+          try { await HBN.api.post(`/admin/chapters/${b.dataset.addLesson}/lessons`, { title: title.trim() }); loadContent(); }
+          catch (e) { HBN.ui.toast(e.message, 'error'); }
+        });
+        wrap.querySelectorAll('[data-edit-lesson]').forEach((b) => b.onclick = async () => {
+          const title = prompt('แก้ชื่อบทเรียน:');
+          if (!title?.trim()) return;
+          try { await HBN.api.patch(`/admin/lessons/${b.dataset.editLesson}`, { title: title.trim() }); loadContent(); }
+          catch (e) { HBN.ui.toast(e.message, 'error'); }
+        });
+        wrap.querySelectorAll('[data-restore-lesson]').forEach((b) => b.onclick = async () => {
+          try { await HBN.api.post(`/admin/lessons/${b.dataset.restoreLesson}/restore`, {}); HBN.ui.toast('กู้คืนบทเรียนแล้ว ✅', 'success'); loadContent(); }
+          catch (e) { HBN.ui.toast(e.message, 'error'); }
+        });
+        wrap.querySelectorAll('[data-restore-chapter]').forEach((b) => b.onclick = async () => {
+          try { await HBN.api.post(`/admin/chapters/${b.dataset.restoreChapter}/restore`, {}); HBN.ui.toast('กู้คืนบทแล้ว ✅', 'success'); loadContent(); }
+          catch (e) { HBN.ui.toast(e.message, 'error'); }
+        });
+        wrap.querySelectorAll('[data-del-lesson]').forEach((b) => b.onclick = async () => {
+          if (!confirm('ซ่อนบทเรียนนี้?')) return;
+          try { await HBN.api.del(`/admin/lessons/${b.dataset.delLesson}`); HBN.ui.toast('ซ่อนบทเรียนแล้ว', 'success'); loadContent(); }
+          catch (e) { HBN.ui.toast(e.message, 'error'); }
+        });
+        wrap.querySelectorAll('[data-edit-chapter]').forEach((b) => b.onclick = async () => {
+          const title = prompt('แก้ชื่อบท:', b.dataset.title);
+          if (!title?.trim()) return;
+          try { await HBN.api.patch(`/admin/chapters/${b.dataset.editChapter}`, { title: title.trim() }); loadContent(); }
+          catch (e) { HBN.ui.toast(e.message, 'error'); }
+        });
+        wrap.querySelectorAll('[data-del-chapter]').forEach((b) => b.onclick = async () => {
+          if (!confirm('ซ่อนบทนี้และบทเรียนทั้งหมดข้างใน?')) return;
+          try { await HBN.api.del(`/admin/chapters/${b.dataset.delChapter}`); HBN.ui.toast('ซ่อนบทแล้ว', 'success'); loadContent(); }
+          catch (e) { HBN.ui.toast(e.message, 'error'); }
+        });
+      }
+
+      document.getElementById('addChapterBtn').onclick = async () => {
+        const title = prompt('ชื่อบท (เช่น “บทที่ 1 จำนวนเต็ม”):');
+        if (!title?.trim()) return;
+        try { await HBN.api.post(`/admin/courses/${courseId}/chapters`, { title: title.trim() }); loadContent(); }
+        catch (e) { HBN.ui.toast(e.message, 'error'); }
+      };
+
+      // load both tabs
+      try { await loadInfo(); }
+      catch (e) {
+        HBN.ui.toast('โหลดคอร์สไม่สำเร็จ: ' + e.message, 'error');
+        return;
+      }
+      loadContent();
+    })();
+  </script>
+</body>
+</html>

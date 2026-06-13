@@ -1,0 +1,204 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>แอดมิน — ภาพรวม | HighBrainnet</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=Sarabun:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <link rel="stylesheet" href="../assets/css/styles.css" />
+</head>
+<body class="bg-slate-100">
+
+  <div class="min-h-screen flex">
+    <!-- SIDEBAR -->
+    <aside class="w-64 bg-slate-900 text-white flex-shrink-0 hidden lg:flex flex-col">
+      <a href="dashboard.html" class="flex items-center gap-2 p-5 border-b border-slate-800">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-orange-400 to-orange-600 grid place-items-center text-white font-extrabold">H</div>
+        <div>
+          <div class="font-bold">HighBrainnet</div>
+          <div class="text-xs text-slate-400">แอดมิน</div>
+        </div>
+      </a>
+      <nav class="sidenav flex-1 p-3 space-y-1 text-sm">
+        <a href="dashboard.html" class="active"><i data-lucide="layout-dashboard" class="w-4 h-4"></i> ภาพรวม</a>
+        <a href="courses.html"><i data-lucide="book-open" class="w-4 h-4"></i> จัดการคอร์ส</a>
+        <a href="payments.html"><i data-lucide="banknote" class="w-4 h-4"></i> ตรวจสอบการชำระเงิน <span id="pendingBadge" class="ml-auto badge badge-red" style="display:none">0</span></a>
+        <a href="reports.html"><i data-lucide="bar-chart-3" class="w-4 h-4"></i> รายงาน / Export</a>
+      </nav>
+      <a href="#" data-logout class="m-3 btn btn-ghost text-slate-300 text-sm"><i data-lucide="log-out" class="w-4 h-4"></i> ออกจากระบบ</a>
+    </aside>
+
+    <!-- MAIN -->
+    <div class="flex-1 min-w-0">
+      <!-- top bar -->
+      <header class="bg-white border-b border-slate-200 sticky top-0 z-30">
+        <div class="px-4 sm:px-6 flex items-center justify-between h-16">
+          <h1 class="font-bold text-lg hidden md:block">ภาพรวมระบบ</h1>
+          <div class="flex items-center gap-3 ml-auto">
+            <div class="flex items-center gap-2">
+              <div class="w-8 h-8 rounded-full bg-orange-100 grid place-items-center text-brand font-bold">A</div>
+              <div class="hidden sm:block"><div class="text-sm font-semibold leading-none" data-user-name></div></div>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <main class="p-6">
+        <!-- KPI cards -->
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+          <div class="card p-5">
+            <div class="flex items-start justify-between">
+              <div>
+                <div class="text-sm text-slate-500">ยอดขายวันนี้</div>
+                <div id="kpiToday" class="text-2xl font-extrabold mt-1">—</div>
+                <div id="kpiTodayOrders" class="text-xs text-slate-500 mt-1"></div>
+              </div>
+              <div class="w-11 h-11 rounded-lg bg-orange-100 grid place-items-center"><i data-lucide="dollar-sign" class="w-5 h-5 text-brand"></i></div>
+            </div>
+          </div>
+          <div class="card p-5">
+            <div class="flex items-start justify-between">
+              <div>
+                <div class="text-sm text-slate-500">ยอดขายเดือนนี้</div>
+                <div id="kpiMonth" class="text-2xl font-extrabold mt-1">—</div>
+                <div id="kpiMonthOrders" class="text-xs text-slate-500 mt-1"></div>
+              </div>
+              <div class="w-11 h-11 rounded-lg bg-green-100 grid place-items-center"><i data-lucide="trending-up" class="w-5 h-5 text-green-600"></i></div>
+            </div>
+          </div>
+          <div class="card p-5">
+            <div class="flex items-start justify-between">
+              <div>
+                <div class="text-sm text-slate-500">นักเรียนใหม่เดือนนี้</div>
+                <div id="kpiStudents" class="text-2xl font-extrabold mt-1">—</div>
+                <div id="kpiStudentsTotal" class="text-xs text-slate-500 mt-1"></div>
+              </div>
+              <div class="w-11 h-11 rounded-lg bg-blue-100 grid place-items-center"><i data-lucide="user-plus" class="w-5 h-5 text-blue-600"></i></div>
+            </div>
+          </div>
+          <div class="card p-5">
+            <div class="flex items-start justify-between">
+              <div>
+                <div class="text-sm text-slate-500">รอตรวจสอบ</div>
+                <div id="kpiPending" class="text-2xl font-extrabold mt-1">—</div>
+                <div class="text-xs text-amber-600 mt-1 flex items-center gap-1"><i data-lucide="alert-triangle" class="w-3 h-3"></i> manual approve</div>
+              </div>
+              <div class="w-11 h-11 rounded-lg bg-amber-100 grid place-items-center"><i data-lucide="hourglass" class="w-5 h-5 text-amber-600"></i></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Chart -->
+        <div class="grid lg:grid-cols-3 gap-6 mb-6">
+          <div class="card p-5 lg:col-span-2">
+            <div class="flex items-center justify-between mb-4">
+              <h3 class="font-bold">ยอดขาย 30 วันล่าสุด</h3>
+            </div>
+            <div id="salesChart" class="h-56 flex items-end gap-1">
+              <div class="w-full text-center text-slate-400 self-center">กำลังโหลด...</div>
+            </div>
+          </div>
+
+          <div class="card p-5">
+            <h3 class="font-bold mb-4">คำสั่งซื้อล่าสุด</h3>
+            <div id="recentOrders" class="space-y-4 text-sm">
+              <div class="text-slate-400 text-center py-4">กำลังโหลด...</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Top courses -->
+        <div class="card p-5">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="font-bold">คอร์สขายดี (30 วัน)</h3>
+            <a href="courses.html" class="text-sm text-brand font-semibold">ดูทั้งหมด</a>
+          </div>
+          <table class="w-full text-sm">
+            <thead class="text-xs text-slate-500 uppercase tracking-wide">
+              <tr class="border-b border-slate-100">
+                <th class="text-left py-3">คอร์ส</th>
+                <th class="text-right py-3">ยอดขาย (enrollments)</th>
+                <th class="text-right py-3">รายได้</th>
+              </tr>
+            </thead>
+            <tbody id="topCoursesBody">
+              <tr><td colspan="3" class="text-center text-slate-400 py-6">กำลังโหลด...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <script>window.HBN_API_BASE = window.HBN_API_BASE || 'http://localhost:4000';</script>
+  <script src="../assets/js/api.js"></script>
+  <script src="../assets/js/cart.js"></script>
+  <script src="../assets/js/ui.js"></script>
+  <script src="../assets/js/main.js"></script>
+  <script>
+    (async function () {
+      const user = HBN.api.currentUser();
+      if (!user || user.role !== 'ADMIN') { location.href = '../login.html?back=admin/dashboard.html'; return; }
+
+      const esc = (s = '') => String(s).replace(/[&<>"]/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+      try {
+        // ----- KPI -----
+        const s = await HBN.api.get('/admin/dashboard/summary');
+        document.getElementById('kpiToday').textContent = HBN.ui.bahts(s.sales.today.revenue);
+        document.getElementById('kpiTodayOrders').textContent = `${s.sales.today.orders} คำสั่งซื้อ`;
+        document.getElementById('kpiMonth').textContent = HBN.ui.bahts(s.sales.month.revenue);
+        document.getElementById('kpiMonthOrders').textContent = `${s.sales.month.orders} คำสั่งซื้อ`;
+        document.getElementById('kpiStudents').textContent = s.students.newThisMonth;
+        document.getElementById('kpiStudentsTotal').textContent = `ทั้งหมด ${s.students.total} คน`;
+        const pending = s.pending.manualApprovals + s.pending.awaitingPayment;
+        document.getElementById('kpiPending').textContent = pending;
+        if (pending > 0) {
+          const b = document.getElementById('pendingBadge');
+          b.textContent = pending; b.style.display = '';
+        }
+
+        // ----- chart -----
+        const chart = await HBN.api.get('/admin/dashboard/sales-chart?days=30');
+        const maxRev = Math.max(...chart.series.map((d) => d.revenue), 1);
+        document.getElementById('salesChart').innerHTML = chart.series.map((d) => `
+          <div class="flex-1 ${d.revenue > 0 ? 'bg-orange-400 hover:bg-orange-500' : 'bg-slate-100'} rounded-t transition-all"
+               style="height:${Math.max(2, Math.round((d.revenue / maxRev) * 100))}%"
+               title="${d.day} — ${HBN.ui.bahts(d.revenue)} (${d.orders} orders)"></div>`).join('');
+
+        // ----- top courses -----
+        const top = await HBN.api.get('/admin/dashboard/top-courses?days=30&limit=5');
+        document.getElementById('topCoursesBody').innerHTML = top.items.length
+          ? top.items.map((c) => `
+              <tr class="border-b border-slate-50 hover:bg-slate-50">
+                <td class="py-3 font-semibold">${esc(c.title)}</td>
+                <td class="text-right font-semibold">${c.enrollments}</td>
+                <td class="text-right text-brand font-bold">${HBN.ui.bahts(c.revenue)}</td>
+              </tr>`).join('')
+          : '<tr><td colspan="3" class="text-center text-slate-400 py-6">ยังไม่มีข้อมูล</td></tr>';
+
+        // ----- recent orders -----
+        const orders = await HBN.api.get('/admin/orders?take=6');
+        document.getElementById('recentOrders').innerHTML = orders.items.length
+          ? orders.items.map((o) => `
+              <div class="flex gap-3">
+                <div class="w-9 h-9 rounded-full ${o.status === 'PAID' ? 'bg-green-100' : 'bg-amber-100'} grid place-items-center flex-shrink-0">
+                  <i data-lucide="${o.status === 'PAID' ? 'check' : 'hourglass'}" class="w-4 h-4 ${o.status === 'PAID' ? 'text-green-600' : 'text-amber-600'}"></i>
+                </div>
+                <div class="min-w-0">
+                  <div class="truncate"><strong>${esc(o.orderNumber)}</strong> · ${HBN.ui.bahts(o.amount)}</div>
+                  <div class="text-xs text-slate-400">${o.status} · ${new Date(o.createdAt).toLocaleString('th-TH')}</div>
+                </div>
+              </div>`).join('')
+          : '<div class="text-slate-400 text-center py-4">ยังไม่มีคำสั่งซื้อ</div>';
+
+        window.lucide?.createIcons();
+      } catch (e) {
+        HBN.ui.toast('โหลดข้อมูลไม่สำเร็จ: ' + e.message, 'error');
+      }
+    })();
+  </script>
+</body>
+</html>

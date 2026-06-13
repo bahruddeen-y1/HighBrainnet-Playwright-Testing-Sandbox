@@ -1,0 +1,220 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>แอดมิน — จัดการคอร์ส | HighBrainnet</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=Sarabun:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <link rel="stylesheet" href="../assets/css/styles.css" />
+</head>
+<body class="bg-slate-100">
+
+  <div class="min-h-screen flex">
+    <aside class="w-64 bg-slate-900 text-white flex-shrink-0 hidden lg:flex flex-col">
+      <a href="dashboard.html" class="flex items-center gap-2 p-5 border-b border-slate-800">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-orange-400 to-orange-600 grid place-items-center text-white font-extrabold">H</div>
+        <div><div class="font-bold">HighBrainnet</div><div class="text-xs text-slate-400">แอดมิน</div></div>
+      </a>
+      <nav class="sidenav flex-1 p-3 space-y-1 text-sm">
+        <a href="dashboard.html"><i data-lucide="layout-dashboard" class="w-4 h-4"></i> ภาพรวม</a>
+        <a href="courses.html" class="active"><i data-lucide="book-open" class="w-4 h-4"></i> จัดการคอร์ส</a>
+        <a href="payments.html"><i data-lucide="banknote" class="w-4 h-4"></i> ตรวจสอบการชำระเงิน</a>
+        <a href="reports.html"><i data-lucide="bar-chart-3" class="w-4 h-4"></i> รายงาน / Export</a>
+      </nav>
+      <a href="#" data-logout class="m-3 btn btn-ghost text-slate-300 text-sm"><i data-lucide="log-out" class="w-4 h-4"></i> ออกจากระบบ</a>
+    </aside>
+
+    <div class="flex-1 min-w-0">
+      <header class="bg-white border-b border-slate-200 sticky top-0 z-30">
+        <div class="px-6 flex items-center justify-between h-16">
+          <h1 class="font-bold text-lg">จัดการคอร์ส</h1>
+          <button id="newCourseBtn" class="btn btn-primary text-sm"><i data-lucide="plus" class="w-4 h-4"></i> สร้างคอร์สใหม่</button>
+        </div>
+      </header>
+
+      <main class="p-6">
+        <!-- Filter row -->
+        <div class="card p-4 flex flex-wrap gap-3 items-center mb-5">
+          <div class="relative flex-1 min-w-[200px]">
+            <input id="searchInput" class="w-full pl-9 pr-3 py-2 rounded-lg border border-slate-200 text-sm" placeholder="ค้นหาคอร์ส..."/>
+            <i data-lucide="search" class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
+          </div>
+          <select id="levelSelect" class="text-sm border border-slate-200 rounded-lg px-3 py-2">
+            <option value="">ทุกระดับ</option>
+          </select>
+          <label class="text-sm flex items-center gap-2">
+            <input id="showDeleted" type="checkbox" class="accent-orange-500" /> แสดงที่ถูกซ่อน
+          </label>
+        </div>
+
+        <!-- Table -->
+        <div class="card overflow-hidden">
+          <table class="w-full text-sm">
+            <thead class="bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
+              <tr>
+                <th class="text-left p-4">คอร์ส</th>
+                <th class="text-left p-4">ระดับ</th>
+                <th class="text-left p-4">Version</th>
+                <th class="text-right p-4">ราคา</th>
+                <th class="text-center p-4">สถานะ</th>
+                <th class="text-right p-4">การจัดการ</th>
+              </tr>
+            </thead>
+            <tbody id="coursesBody">
+              <tr><td colspan="6" class="text-center text-slate-400 py-10">กำลังโหลด...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <!-- CREATE MODAL -->
+  <div id="createModal" class="modal-backdrop">
+    <div class="modal-panel" style="max-width:480px">
+      <h3 class="font-bold text-lg mb-4">สร้างคอร์สใหม่</h3>
+      <form id="createForm" class="space-y-3">
+        <div>
+          <label class="text-sm font-semibold mb-1 block">ชื่อคอร์ส</label>
+          <input name="title" required class="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm"/>
+        </div>
+        <div>
+          <label class="text-sm font-semibold mb-1 block">ระดับชั้น</label>
+          <select name="levelId" required id="modalLevelSelect" class="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm"></select>
+        </div>
+        <div>
+          <label class="text-sm font-semibold mb-1 block">ราคา (บาท)</label>
+          <input name="price" type="number" min="0" required class="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm"/>
+        </div>
+        <div>
+          <label class="text-sm font-semibold mb-1 block">คำอธิบาย</label>
+          <textarea name="description" rows="3" class="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm"></textarea>
+        </div>
+        <div class="flex gap-2 pt-2">
+          <button type="submit" class="btn btn-primary flex-1">สร้างคอร์ส</button>
+          <button type="button" data-modal-close class="btn btn-outline">ยกเลิก</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>window.HBN_API_BASE = window.HBN_API_BASE || 'http://localhost:4000';</script>
+  <script src="../assets/js/api.js"></script>
+  <script src="../assets/js/cart.js"></script>
+  <script src="../assets/js/ui.js"></script>
+  <script src="../assets/js/main.js"></script>
+  <script>
+    (async function () {
+      const user = HBN.api.currentUser();
+      if (!user || user.role !== 'ADMIN') { location.href = '../login.html?back=admin/courses.html'; return; }
+
+      const esc = (s = '') => String(s).replace(/[&<>"]/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+      // ----- levels -----
+      const { items: levels } = await HBN.api.get('/levels');
+      const opts = levels.map((l) => `<option value="${l.id}">${esc(l.name)}</option>`).join('');
+      document.getElementById('levelSelect').innerHTML = '<option value="">ทุกระดับ</option>' + opts;
+      document.getElementById('modalLevelSelect').innerHTML = opts;
+
+      async function load() {
+        const body = document.getElementById('coursesBody');
+        body.innerHTML = '<tr><td colspan="6" class="text-center text-slate-400 py-10">กำลังโหลด...</td></tr>';
+        const params = new URLSearchParams({ includeHidden: 'true', take: '100' });
+        const lvl = document.getElementById('levelSelect').value;
+        const q = document.getElementById('searchInput').value.trim();
+        if (document.getElementById('showDeleted').checked) params.set('includeDeleted', 'true');
+        if (lvl) params.set('level', lvl);
+        if (q) params.set('q', q);
+
+        try {
+          const { items } = await HBN.api.get('/admin/courses?' + params.toString());
+          if (!items.length) {
+            body.innerHTML = '<tr><td colspan="6" class="text-center text-slate-400 py-10">ไม่มีคอร์ส</td></tr>';
+            return;
+          }
+          body.innerHTML = items.map((c) => `
+            <tr class="border-t border-slate-100 hover:bg-slate-50 ${c.isDeleted ? 'opacity-50' : ''}">
+              <td class="p-4">
+                <div class="font-semibold">${esc(c.title)}</div>
+                <div class="text-xs text-slate-500">${esc(c.slug)}</div>
+              </td>
+              <td>${esc(c.level?.name || '')}</td>
+              <td>${esc(c.currentVersion?.versionLabel || '—')}</td>
+              <td class="text-right font-semibold">${HBN.ui.bahts(c.price)}</td>
+              <td class="text-center">
+                ${c.isDeleted
+                  ? '<span class="badge badge-red">ถูกซ่อน</span>'
+                  : c.isVisible ? '<span class="badge badge-green">เผยแพร่</span>' : '<span class="badge badge-gray">ไม่แสดง</span>'}
+              </td>
+              <td class="text-right">
+                <div class="flex gap-1 justify-end">
+                  <a href="../course-detail.html?slug=${encodeURIComponent(c.slug)}" target="_blank" title="ดูหน้าเว็บ" class="w-8 h-8 grid place-items-center rounded hover:bg-slate-100"><i data-lucide="eye" class="w-4 h-4"></i></a>
+                  <a href="course-edit.html?id=${encodeURIComponent(c.id)}" title="แก้ไข" class="w-8 h-8 grid place-items-center rounded hover:bg-slate-100"><i data-lucide="edit" class="w-4 h-4"></i></a>
+                  ${c.isDeleted
+                    ? `<button data-restore="${c.id}" title="กู้คืน" class="w-8 h-8 grid place-items-center rounded hover:bg-green-50 text-green-600"><i data-lucide="rotate-ccw" class="w-4 h-4"></i></button>`
+                    : `<button data-delete="${c.id}" title="ซ่อน (soft delete)" class="w-8 h-8 grid place-items-center rounded hover:bg-red-50 text-red-500"><i data-lucide="trash-2" class="w-4 h-4"></i></button>`}
+                </div>
+              </td>
+            </tr>`).join('');
+          window.lucide?.createIcons();
+
+          body.querySelectorAll('[data-delete]').forEach((btn) => {
+            btn.addEventListener('click', async () => {
+              try {
+                const r = await HBN.api.del(`/admin/courses/${btn.dataset.delete}`);
+                if (r.affectedStudents > 0) {
+                  HBN.ui.toast(`ซ่อนแล้ว — มีนักเรียน ${r.affectedStudents} คนที่ยังเข้าถึงเนื้อหาเดิมได้`, 'success');
+                } else {
+                  HBN.ui.toast('ซ่อนคอร์สแล้ว', 'success');
+                }
+                load();
+              } catch (e) { HBN.ui.toast(e.message, 'error'); }
+            });
+          });
+          body.querySelectorAll('[data-restore]').forEach((btn) => {
+            btn.addEventListener('click', async () => {
+              try {
+                await HBN.api.post(`/admin/courses/${btn.dataset.restore}/restore`, {});
+                HBN.ui.toast('กู้คืนแล้ว ✅', 'success');
+                load();
+              } catch (e) { HBN.ui.toast(e.message, 'error'); }
+            });
+          });
+        } catch (e) {
+          body.innerHTML = `<tr><td colspan="6" class="text-center text-red-500 py-10">${esc(e.message)}</td></tr>`;
+        }
+      }
+
+      // ----- create -----
+      document.getElementById('newCourseBtn').addEventListener('click', () => {
+        document.getElementById('createModal').classList.add('open');
+      });
+      document.getElementById('createForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const fd = new FormData(e.target);
+        try {
+          await HBN.api.post('/admin/courses', {
+            title: fd.get('title'),
+            levelId: fd.get('levelId'),
+            price: Number(fd.get('price')),
+            description: fd.get('description') || undefined,
+          });
+          HBN.ui.toast('สร้างคอร์สแล้ว 🎉', 'success');
+          document.getElementById('createModal').classList.remove('open');
+          e.target.reset();
+          load();
+        } catch (err) { HBN.ui.toast(err.message, 'error'); }
+      });
+
+      let t;
+      document.getElementById('searchInput').addEventListener('input', () => { clearTimeout(t); t = setTimeout(load, 300); });
+      document.getElementById('levelSelect').addEventListener('change', load);
+      document.getElementById('showDeleted').addEventListener('change', load);
+
+      load();
+    })();
+  </script>
+</body>
+</html>

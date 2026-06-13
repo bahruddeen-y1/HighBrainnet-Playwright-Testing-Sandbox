@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>แอดมิน — รายงาน | HighBrainnet</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=Sarabun:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <link rel="stylesheet" href="../assets/css/styles.css" />
+</head>
+<body class="bg-slate-100">
+
+  <div class="min-h-screen flex">
+    <aside class="w-64 bg-slate-900 text-white flex-shrink-0 hidden lg:flex flex-col">
+      <a href="dashboard.html" class="flex items-center gap-2 p-5 border-b border-slate-800">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-orange-400 to-orange-600 grid place-items-center text-white font-extrabold">H</div>
+        <div><div class="font-bold">HighBrainnet</div><div class="text-xs text-slate-400">แอดมิน</div></div>
+      </a>
+      <nav class="sidenav flex-1 p-3 space-y-1 text-sm">
+        <a href="dashboard.html"><i data-lucide="layout-dashboard" class="w-4 h-4"></i> ภาพรวม</a>
+        <a href="courses.html"><i data-lucide="book-open" class="w-4 h-4"></i> จัดการคอร์ส</a>
+        <a href="payments.html"><i data-lucide="banknote" class="w-4 h-4"></i> ตรวจสอบการชำระเงิน</a>
+        <a href="reports.html" class="active"><i data-lucide="bar-chart-3" class="w-4 h-4"></i> รายงาน / Export</a>
+      </nav>
+      <a href="#" data-logout class="m-3 btn btn-ghost text-slate-300 text-sm"><i data-lucide="log-out" class="w-4 h-4"></i> ออกจากระบบ</a>
+    </aside>
+
+    <div class="flex-1 min-w-0">
+      <header class="bg-white border-b border-slate-200 sticky top-0 z-30">
+        <div class="px-6 flex items-center justify-between h-16">
+          <h1 class="font-bold text-lg">รายงาน / Export Excel</h1>
+        </div>
+      </header>
+
+      <main class="p-6 max-w-4xl">
+        <!-- Shared filters -->
+        <div class="card p-5 mb-6">
+          <h3 class="font-bold mb-3 text-sm flex items-center gap-2"><i data-lucide="filter" class="w-4 h-4 text-brand"></i> ตัวกรอง (ใช้กับรายงานที่รองรับ)</h3>
+          <div class="grid sm:grid-cols-4 gap-3">
+            <div>
+              <label class="text-xs font-semibold text-slate-500 block mb-1">ช่วงเวลา</label>
+              <select id="rangePreset" class="w-full text-sm border border-slate-200 rounded-lg px-3 py-2 bg-white">
+                <option value="">ทั้งหมด</option>
+                <option value="today">วันนี้</option>
+                <option value="week">7 วันล่าสุด</option>
+                <option value="month">เดือนนี้</option>
+                <option value="custom">กำหนดเอง</option>
+              </select>
+            </div>
+            <div>
+              <label class="text-xs font-semibold text-slate-500 block mb-1">จาก</label>
+              <input id="fromDate" type="date" class="w-full text-sm border border-slate-200 rounded-lg px-3 py-2" disabled/>
+            </div>
+            <div>
+              <label class="text-xs font-semibold text-slate-500 block mb-1">ถึง</label>
+              <input id="toDate" type="date" class="w-full text-sm border border-slate-200 rounded-lg px-3 py-2" disabled/>
+            </div>
+            <div>
+              <label class="text-xs font-semibold text-slate-500 block mb-1">คอร์ส</label>
+              <select id="courseFilter" class="w-full text-sm border border-slate-200 rounded-lg px-3 py-2 bg-white">
+                <option value="">ทุกคอร์ส</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- Export cards -->
+        <div class="grid sm:grid-cols-2 gap-4">
+          <div class="card p-5">
+            <div class="flex items-center gap-3 mb-2">
+              <div class="w-10 h-10 rounded-lg bg-orange-100 grid place-items-center"><i data-lucide="trending-up" class="w-5 h-5 text-brand"></i></div>
+              <div><div class="font-bold">ยอดขาย</div><div class="text-xs text-slate-500">ใช้ filter: ช่วงเวลา + คอร์ส</div></div>
+            </div>
+            <button data-export="sales" class="btn btn-primary btn-sm w-full mt-2"><i data-lucide="download" class="w-4 h-4"></i> Export .xlsx</button>
+          </div>
+
+          <div class="card p-5">
+            <div class="flex items-center gap-3 mb-2">
+              <div class="w-10 h-10 rounded-lg bg-blue-100 grid place-items-center"><i data-lucide="users" class="w-5 h-5 text-blue-600"></i></div>
+              <div><div class="font-bold">รายชื่อนักเรียน</div><div class="text-xs text-slate-500">ทั้งหมด + จำนวนคอร์ส + สถานะ</div></div>
+            </div>
+            <button data-export="students" class="btn btn-primary btn-sm w-full mt-2"><i data-lucide="download" class="w-4 h-4"></i> Export .xlsx</button>
+          </div>
+
+          <div class="card p-5">
+            <div class="flex items-center gap-3 mb-2">
+              <div class="w-10 h-10 rounded-lg bg-green-100 grid place-items-center"><i data-lucide="banknote" class="w-5 h-5 text-green-600"></i></div>
+              <div><div class="font-bold">ประวัติการชำระ</div><div class="text-xs text-slate-500">ใช้ filter: ช่วงเวลา</div></div>
+            </div>
+            <button data-export="payments" class="btn btn-primary btn-sm w-full mt-2"><i data-lucide="download" class="w-4 h-4"></i> Export .xlsx</button>
+          </div>
+
+          <div class="card p-5">
+            <div class="flex items-center gap-3 mb-2">
+              <div class="w-10 h-10 rounded-lg bg-purple-100 grid place-items-center"><i data-lucide="clipboard-check" class="w-5 h-5 text-purple-600"></i></div>
+              <div><div class="font-bold">คะแนน Quiz</div><div class="text-xs text-slate-500">ใช้ filter: ช่วงเวลา + คอร์ส</div></div>
+            </div>
+            <button data-export="quiz-scores" class="btn btn-primary btn-sm w-full mt-2"><i data-lucide="download" class="w-4 h-4"></i> Export .xlsx</button>
+          </div>
+
+          <div class="card p-5 sm:col-span-2">
+            <div class="flex items-center gap-3 mb-2">
+              <div class="w-10 h-10 rounded-lg bg-amber-100 grid place-items-center"><i data-lucide="trophy" class="w-5 h-5 text-amber-600"></i></div>
+              <div><div class="font-bold">รายชื่อสอบติด</div><div class="text-xs text-slate-500">ชื่อจริงครบ (ไฟล์นี้สำหรับครูเท่านั้น — ระวัง PDPA)</div></div>
+            </div>
+            <button data-export="exam-credits" class="btn btn-primary btn-sm w-full mt-2"><i data-lucide="download" class="w-4 h-4"></i> Export .xlsx</button>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <script>window.HBN_API_BASE = window.HBN_API_BASE || 'http://localhost:4000';</script>
+  <script src="../assets/js/api.js"></script>
+  <script src="../assets/js/cart.js"></script>
+  <script src="../assets/js/ui.js"></script>
+  <script src="../assets/js/main.js"></script>
+  <script>
+    (async function () {
+      const user = HBN.api.currentUser();
+      if (!user || user.role !== 'ADMIN') { location.href = '../login.html?back=admin/reports.html'; return; }
+
+      // courses for filter
+      try {
+        const { items } = await HBN.api.get('/admin/courses?includeHidden=true&take=100');
+        const sel = document.getElementById('courseFilter');
+        items.forEach((c) => {
+          const o = document.createElement('option');
+          o.value = c.id; o.textContent = c.title;
+          sel.appendChild(o);
+        });
+      } catch {}
+
+      // range preset → from/to
+      const fromEl = document.getElementById('fromDate');
+      const toEl = document.getElementById('toDate');
+      const fmt = (d) => d.toISOString().slice(0, 10);
+      document.getElementById('rangePreset').addEventListener('change', (e) => {
+        const v = e.target.value;
+        const today = new Date();
+        const custom = v === 'custom';
+        fromEl.disabled = toEl.disabled = !custom;
+        if (v === 'today') { fromEl.value = toEl.value = fmt(today); }
+        else if (v === 'week') {
+          const w = new Date(today); w.setDate(today.getDate() - 6);
+          fromEl.value = fmt(w); toEl.value = fmt(today);
+        } else if (v === 'month') {
+          const m = new Date(today.getFullYear(), today.getMonth(), 1);
+          fromEl.value = fmt(m); toEl.value = fmt(today);
+        } else if (!custom) { fromEl.value = toEl.value = ''; }
+      });
+
+      document.querySelectorAll('[data-export]').forEach((btn) => {
+        btn.addEventListener('click', async () => {
+          const name = btn.dataset.export;
+          const params = new URLSearchParams();
+          if (fromEl.value) params.set('from', fromEl.value);
+          if (toEl.value) params.set('to', toEl.value);
+          const courseId = document.getElementById('courseFilter').value;
+          if (courseId && (name === 'sales' || name === 'quiz-scores')) params.set('courseId', courseId);
+
+          const original = btn.innerHTML;
+          btn.disabled = true; btn.textContent = 'กำลังสร้างไฟล์...';
+          try {
+            await HBN.api.downloadFile(`/admin/export/${name}.xlsx?${params}`, `${name}.xlsx`);
+            HBN.ui.toast('ดาวน์โหลดแล้ว ✅', 'success');
+          } catch (e) { HBN.ui.toast(e.message, 'error'); }
+          btn.disabled = false; btn.innerHTML = original;
+          window.lucide?.createIcons();
+        });
+      });
+    })();
+  </script>
+</body>
+</html>

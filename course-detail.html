@@ -1,0 +1,523 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>เคมี IJSO สำหรับสอบรอบแรก — HighBrainnet</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=Sarabun:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <link rel="stylesheet" href="assets/css/styles.css" />
+</head>
+<body class="bg-slate-50">
+
+  <!-- HEADER -->
+  <header class="sticky top-0 z-40 glass-nav">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6">
+      <div class="flex items-center justify-between h-16">
+        <a href="index.html" class="flex items-center gap-2.5">
+          <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-orange-400 to-orange-600 grid place-items-center text-white font-extrabold">H</div>
+          <div class="leading-tight"><div class="font-extrabold text-[15px]">HighBrainnet</div><div class="text-[10px] text-slate-500 -mt-0.5">เรียนรู้แบบ Concept</div></div>
+        </a>
+        <nav class="hidden md:flex items-center gap-7 text-sm font-medium text-slate-700">
+          <a href="index.html" class="hover:text-brand">หน้าแรก</a>
+          <a href="courses.html" class="text-brand">คอร์สเรียน</a>
+          <a href="#" class="hover:text-brand">เกี่ยวกับเรา</a>
+        </nav>
+        <div class="hidden md:flex items-center gap-2">
+          <a href="cart.html" class="relative w-10 h-10 grid place-items-center rounded-lg hover:bg-slate-100">
+            <i data-lucide="shopping-cart" class="w-5 h-5"></i>
+            <span data-cart-badge class="absolute top-1 right-1 w-4 h-4 text-[10px] grid place-items-center bg-brand text-white rounded-full font-bold" style="display:none">0</span>
+          </a>
+          <a href="my-courses.html" data-auth-only class="btn btn-ghost btn-sm" style="display:none">คอร์สของฉัน</a>
+          <a href="#" data-auth-only data-logout class="btn btn-ghost btn-sm" style="display:none">ออกจากระบบ</a>
+          <a href="login.html" data-guest-only class="btn btn-ghost btn-sm">เข้าสู่ระบบ</a>
+        </div>
+        <button data-menu-toggle class="md:hidden p-2"><i data-lucide="menu" class="w-6 h-6"></i></button>
+      </div>
+    </div>
+  </header>
+
+  <!-- DARK HERO with blobs -->
+  <section class="relative overflow-hidden bg-gradient-to-br from-slate-900 via-slate-900 to-slate-800 text-white">
+    <div class="blob bg-orange-500" style="width:520px;height:520px;top:-200px;right:-100px;opacity:.35"></div>
+    <div class="blob bg-amber-500" style="width:380px;height:380px;bottom:-180px;left:-100px;opacity:.2"></div>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 pt-6 pb-32 relative">
+      <!-- Breadcrumb -->
+      <nav class="text-xs text-slate-400 flex items-center gap-2 mb-6">
+        <a href="index.html" class="hover:text-brand">หน้าแรก</a>
+        <i data-lucide="chevron-right" class="w-3 h-3"></i>
+        <a href="courses.html" class="hover:text-brand">คอร์สเรียน</a>
+        <i data-lucide="chevron-right" class="w-3 h-3"></i>
+        <span id="bcTitle" class="text-slate-200">กำลังโหลด...</span>
+      </nav>
+
+      <div class="grid lg:grid-cols-[1.5fr_1fr] gap-10 items-start">
+        <div>
+          <div id="courseBadges" class="flex flex-wrap gap-2 mb-4"></div>
+          <h1 id="courseTitle" class="text-3xl md:text-5xl font-extrabold leading-[1.1] tracking-tight">กำลังโหลด...</h1>
+          <p id="courseSubtitle" class="mt-4 text-slate-300 text-lg max-w-2xl leading-relaxed"></p>
+
+          <div class="flex flex-wrap items-center gap-5 mt-6">
+            <div class="flex items-center gap-2">
+              <div class="flex star text-base"><i data-lucide="star" class="w-5 h-5 fill-current"></i><i data-lucide="star" class="w-5 h-5 fill-current"></i><i data-lucide="star" class="w-5 h-5 fill-current"></i><i data-lucide="star" class="w-5 h-5 fill-current"></i><i data-lucide="star" class="w-5 h-5 fill-current"></i></div>
+              <span class="font-bold">5.0</span>
+              <span class="text-slate-400 text-sm">(3 รีวิว)</span>
+            </div>
+            <div class="text-sm text-slate-400 flex items-center gap-2"><i data-lucide="users" class="w-4 h-4"></i>142 ผู้เรียน</div>
+            <div class="text-sm text-slate-400 flex items-center gap-2"><i data-lucide="trophy" class="w-4 h-4 text-amber-400"></i>เหรียญทอง 8 คน</div>
+          </div>
+
+          <div class="flex items-center gap-3 mt-6 pt-6 border-t border-white/10">
+            <img src="https://i.pravatar.cc/64?img=12" class="w-12 h-12 rounded-full ring-2 ring-orange-400" alt=""/>
+            <div>
+              <div class="font-bold">ครูพี่แมกซ์ — ธรรศ อยู่สุนทร</div>
+              <div class="text-xs text-slate-400">ติวเตอร์เคมี IJSO/สอวน. ประสบการณ์ 10+ ปี</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Video preview -->
+        <div class="relative">
+          <div class="aspect-video rounded-2xl overflow-hidden shadow-2xl ring-1 ring-white/10 relative">
+            <img src="https://images.unsplash.com/photo-1532094349884-543bc11b234d?w=900&q=80" class="w-full h-full object-cover" alt=""/>
+            <div class="absolute inset-0 bg-gradient-to-t from-slate-900/60 to-transparent"></div>
+            <button data-modal-open="previewModal" class="absolute inset-0 grid place-items-center">
+              <span class="w-20 h-20 rounded-full bg-white/95 backdrop-blur grid place-items-center hover:scale-110 transition shadow-2xl">
+                <i data-lucide="play" class="w-9 h-9 text-brand fill-current ml-1"></i>
+              </span>
+            </button>
+            <span class="absolute top-3 left-3 badge badge-green">ดูตัวอย่างฟรี</span>
+            <div class="absolute bottom-3 left-3 right-3 flex items-center justify-between text-white">
+              <div class="text-xs uppercase tracking-wider font-semibold opacity-90">ตัวอย่าง</div>
+              <div class="badge bg-black/40 backdrop-blur text-white">22:14</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- MAIN GRID -->
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 -mt-24 relative pb-16">
+    <div class="grid lg:grid-cols-[1fr_380px] gap-8 items-start">
+
+      <!-- LEFT: stats + tabs -->
+      <div class="grid gap-6">
+        <!-- KEY STATS -->
+        <div class="card grid grid-cols-2 md:grid-cols-4 divide-y md:divide-y-0 md:divide-x divide-slate-100 overflow-hidden">
+          <div class="p-5 text-center">
+            <i data-lucide="calendar-days" class="w-5 h-5 text-brand mx-auto"></i>
+            <div class="text-xl font-extrabold mt-2">365</div>
+            <div class="text-xs text-slate-500">วันใช้งาน</div>
+          </div>
+          <div class="p-5 text-center">
+            <i data-lucide="clock" class="w-5 h-5 text-brand mx-auto"></i>
+            <div class="text-xl font-extrabold mt-2">67</div>
+            <div class="text-xs text-slate-500">ชั่วโมงดูสิทธิ์</div>
+          </div>
+          <div class="p-5 text-center">
+            <i data-lucide="play-circle" class="w-5 h-5 text-brand mx-auto"></i>
+            <div class="text-xl font-extrabold mt-2">95</div>
+            <div class="text-xs text-slate-500">บทเรียน</div>
+          </div>
+          <div class="p-5 text-center">
+            <i data-lucide="film" class="w-5 h-5 text-brand mx-auto"></i>
+            <div class="text-xl font-extrabold mt-2">57:17</div>
+            <div class="text-xs text-slate-500">ชั่วโมงวิดีโอ</div>
+          </div>
+        </div>
+
+        <!-- TABS CARD -->
+        <div class="card overflow-hidden">
+          <div data-tabs="course" class="flex overflow-x-auto no-scrollbar border-b border-slate-200 bg-white sticky top-16 z-30">
+            <button data-tab="lessons"  class="tab-btn active">บทเรียน</button>
+            <button data-tab="docs"     class="tab-btn">เอกสาร</button>
+            <button data-tab="reviews"  class="tab-btn">รีวิว</button>
+            <button data-tab="steps"    class="tab-btn">ขั้นตอนสมัคร</button>
+            <button data-tab="qa"       class="tab-btn">ถาม-ตอบ</button>
+          </div>
+
+          <!-- LESSONS -->
+          <div data-panel="lessons" data-group="course" class="tab-panel active p-6 grid gap-3">
+            <div class="flex items-center justify-between mb-2">
+              <div>
+                <h3 class="font-bold text-lg">โครงสร้างเนื้อหา</h3>
+                <p id="lessonSummary" class="text-sm text-slate-500 mt-0.5"></p>
+              </div>
+            </div>
+
+            <div id="chapterAccordion" class="grid gap-3">
+              <div class="text-center text-slate-400 py-8">กำลังโหลดบทเรียน...</div>
+            </div>
+          </div>
+
+          <!-- DOCS -->
+          <div data-panel="docs" data-group="course" class="tab-panel p-6">
+            <div class="mb-4">
+              <h3 class="font-bold text-lg">เอกสารประกอบการเรียน</h3>
+              <p class="text-sm text-slate-500 mt-0.5">12 ไฟล์ พร้อมให้ดาวน์โหลด</p>
+            </div>
+            <div class="grid gap-3">
+              <div class="flex items-center gap-4 p-4 border border-slate-200 rounded-lg hover:border-orange-300 hover:bg-orange-50 transition">
+                <div class="stat-circle bg-red-100"><i data-lucide="file-text" class="w-6 h-6 text-red-600"></i></div>
+                <div class="flex-1"><div class="font-semibold">สรุปสูตรเคมี — บทพื้นฐาน.pdf</div><div class="text-xs text-slate-500 mt-0.5">2.4 MB · อัปเดต 12 ม.ค. 2569</div></div>
+                <button class="btn btn-outline btn-sm"><i data-lucide="download" class="w-4 h-4"></i> ดาวน์โหลด</button>
+              </div>
+              <div class="flex items-center gap-4 p-4 border border-slate-200 rounded-lg hover:border-orange-300 hover:bg-orange-50 transition">
+                <div class="stat-circle bg-red-100"><i data-lucide="file-text" class="w-6 h-6 text-red-600"></i></div>
+                <div class="flex-1"><div class="font-semibold">โจทย์ฝึกหัด — อะตอมและตารางธาตุ.pdf</div><div class="text-xs text-slate-500 mt-0.5">1.8 MB</div></div>
+                <button class="btn btn-outline btn-sm"><i data-lucide="download" class="w-4 h-4"></i> ดาวน์โหลด</button>
+              </div>
+              <div class="flex items-center gap-4 p-4 border border-slate-200 rounded-lg hover:border-orange-300 hover:bg-orange-50 transition">
+                <div class="stat-circle bg-red-100"><i data-lucide="file-text" class="w-6 h-6 text-red-600"></i></div>
+                <div class="flex-1"><div class="font-semibold">เฉลยโจทย์ฝึกหัด — พันธะเคมี.pdf</div><div class="text-xs text-slate-500 mt-0.5">3.1 MB</div></div>
+                <button class="btn btn-outline btn-sm"><i data-lucide="download" class="w-4 h-4"></i> ดาวน์โหลด</button>
+              </div>
+              <div class="flex items-center gap-4 p-4 border border-slate-200 rounded-lg hover:border-orange-300 hover:bg-orange-50 transition">
+                <div class="stat-circle bg-red-100"><i data-lucide="file-text" class="w-6 h-6 text-red-600"></i></div>
+                <div class="flex-1"><div class="font-semibold">ข้อสอบเก่า IJSO รอบ 1 ปี 2568.pdf</div><div class="text-xs text-slate-500 mt-0.5">2.0 MB</div></div>
+                <button class="btn btn-outline btn-sm"><i data-lucide="download" class="w-4 h-4"></i> ดาวน์โหลด</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- REVIEWS -->
+          <div data-panel="reviews" data-group="course" class="tab-panel p-6">
+            <div class="grid md:grid-cols-[280px_1fr] gap-8">
+              <div class="text-center md:text-left p-6 bg-orange-50 rounded-xl border border-orange-200">
+                <div class="text-6xl font-extrabold text-gradient">5.0</div>
+                <div class="flex justify-center md:justify-start star text-xl mt-2">
+                  <i data-lucide="star" class="w-5 h-5 fill-current"></i><i data-lucide="star" class="w-5 h-5 fill-current"></i><i data-lucide="star" class="w-5 h-5 fill-current"></i><i data-lucide="star" class="w-5 h-5 fill-current"></i><i data-lucide="star" class="w-5 h-5 fill-current"></i>
+                </div>
+                <div class="text-sm text-slate-600 mt-1 font-medium">จาก 3 รีวิว</div>
+
+                <div class="mt-5 space-y-1.5 text-xs">
+                  <div class="flex items-center gap-2"><span class="w-6 font-semibold">5★</span><div class="flex-1 progress"><div class="progress-bar" style="width:100%"></div></div><span class="w-6 text-right text-slate-500">3</span></div>
+                  <div class="flex items-center gap-2"><span class="w-6 font-semibold">4★</span><div class="flex-1 progress"><div class="progress-bar" style="width:0%"></div></div><span class="w-6 text-right text-slate-500">0</span></div>
+                  <div class="flex items-center gap-2"><span class="w-6 font-semibold">3★</span><div class="flex-1 progress"><div class="progress-bar" style="width:0%"></div></div><span class="w-6 text-right text-slate-500">0</span></div>
+                  <div class="flex items-center gap-2"><span class="w-6 font-semibold">2★</span><div class="flex-1 progress"><div class="progress-bar" style="width:0%"></div></div><span class="w-6 text-right text-slate-500">0</span></div>
+                  <div class="flex items-center gap-2"><span class="w-6 font-semibold">1★</span><div class="flex-1 progress"><div class="progress-bar" style="width:0%"></div></div><span class="w-6 text-right text-slate-500">0</span></div>
+                </div>
+              </div>
+
+              <div>
+                <div class="flex flex-wrap gap-2 mb-5">
+                  <button data-star-filter class="chip active">ทั้งหมด</button>
+                  <button data-star-filter class="chip">5 ดาว</button>
+                  <button data-star-filter class="chip">4 ดาว</button>
+                  <button data-star-filter class="chip">3 ดาว</button>
+                </div>
+
+                <div class="space-y-5">
+                  <div class="border-b border-slate-100 pb-5">
+                    <div class="flex items-center gap-3 mb-2">
+                      <img src="https://i.pravatar.cc/40?img=32" class="w-10 h-10 rounded-full ring-2 ring-orange-200" alt=""/>
+                      <div class="flex-1">
+                        <div class="font-bold text-sm">น้อง***ก้า</div>
+                        <div class="flex items-center gap-2 text-xs text-slate-500">
+                          <span class="star flex"><i data-lucide="star" class="w-3 h-3 fill-current"></i><i data-lucide="star" class="w-3 h-3 fill-current"></i><i data-lucide="star" class="w-3 h-3 fill-current"></i><i data-lucide="star" class="w-3 h-3 fill-current"></i><i data-lucide="star" class="w-3 h-3 fill-current"></i></span>
+                          <span>· 2 สัปดาห์ที่แล้ว</span>
+                        </div>
+                      </div>
+                    </div>
+                    <p class="text-slate-700 leading-relaxed">"เนื้อหาแน่นมาก สอนสนุก เข้าใจง่าย พี่แมกซ์อธิบายเป็นขั้นเป็นตอน ทำให้เห็นภาพรวมของวิชาเคมีได้ชัดเจน"</p>
+                  </div>
+                  <div class="border-b border-slate-100 pb-5">
+                    <div class="flex items-center gap-3 mb-2">
+                      <img src="https://i.pravatar.cc/40?img=23" class="w-10 h-10 rounded-full ring-2 ring-orange-200" alt=""/>
+                      <div class="flex-1">
+                        <div class="font-bold text-sm">น้อง***ปลื้ม</div>
+                        <div class="flex items-center gap-2 text-xs text-slate-500">
+                          <span class="star flex"><i data-lucide="star" class="w-3 h-3 fill-current"></i><i data-lucide="star" class="w-3 h-3 fill-current"></i><i data-lucide="star" class="w-3 h-3 fill-current"></i><i data-lucide="star" class="w-3 h-3 fill-current"></i><i data-lucide="star" class="w-3 h-3 fill-current"></i></span>
+                          <span>· 1 เดือนที่แล้ว</span>
+                        </div>
+                      </div>
+                    </div>
+                    <p class="text-slate-700 leading-relaxed">"โจทย์ฝึกหัดเยอะ ครอบคลุมแนวข้อสอบทุกประเภท พี่แมกซ์มี Quiz ให้ทำหลังบท ช่วยให้รู้ว่าตัวเองเข้าใจหรือยัง"</p>
+                  </div>
+                  <div>
+                    <div class="flex items-center gap-3 mb-2">
+                      <img src="https://i.pravatar.cc/40?img=45" class="w-10 h-10 rounded-full ring-2 ring-orange-200" alt=""/>
+                      <div class="flex-1">
+                        <div class="font-bold text-sm">น้อง***เนย</div>
+                        <div class="flex items-center gap-2 text-xs text-slate-500">
+                          <span class="star flex"><i data-lucide="star" class="w-3 h-3 fill-current"></i><i data-lucide="star" class="w-3 h-3 fill-current"></i><i data-lucide="star" class="w-3 h-3 fill-current"></i><i data-lucide="star" class="w-3 h-3 fill-current"></i><i data-lucide="star" class="w-3 h-3 fill-current"></i></span>
+                          <span>· 2 เดือนที่แล้ว</span>
+                        </div>
+                      </div>
+                    </div>
+                    <p class="text-slate-700 leading-relaxed">"เรียนกับพี่แมกซ์แล้วผ่านเข้ารอบ 2 IJSO ได้เลย คุ้มมาก แนะนำคนที่อยากเตรียมตัวสอบจริงๆ"</p>
+                  </div>
+                </div>
+
+                <button class="btn btn-outline mt-6"><i data-lucide="pen-line" class="w-4 h-4"></i> เขียนรีวิว</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- STEPS -->
+          <div data-panel="steps" data-group="course" class="tab-panel p-6">
+            <div class="mb-6">
+              <h3 class="font-bold text-lg">ขั้นตอนการสมัครเรียน</h3>
+              <p class="text-sm text-slate-500 mt-0.5">เริ่มเรียนได้ใน 7 ขั้นตอนง่ายๆ</p>
+            </div>
+            <div class="grid md:grid-cols-2 gap-5 mb-8">
+              <div class="flex items-start gap-4"><div class="step-num flex-shrink-0">1</div><div><div class="font-bold">เลือกคอร์ส</div><div class="text-sm text-slate-500 mt-0.5">เพิ่มลงตะกร้า หรือซื้อทันที</div></div></div>
+              <div class="flex items-start gap-4"><div class="step-num flex-shrink-0">2</div><div><div class="font-bold">เข้าสู่ระบบ / สมัครสมาชิก</div><div class="text-sm text-slate-500 mt-0.5">ใช้อีเมลหรือเบอร์โทร</div></div></div>
+              <div class="flex items-start gap-4"><div class="step-num flex-shrink-0">3</div><div><div class="font-bold">เลือกช่องทางชำระเงิน</div><div class="text-sm text-slate-500 mt-0.5">โอนผ่านธนาคาร / พร้อมเพย์</div></div></div>
+              <div class="flex items-start gap-4"><div class="step-num flex-shrink-0">4</div><div><div class="font-bold">ตรวจสอบรายละเอียด</div><div class="text-sm text-slate-500 mt-0.5">ยืนยันข้อมูลก่อนทำรายการ</div></div></div>
+              <div class="flex items-start gap-4"><div class="step-num flex-shrink-0">5</div><div><div class="font-bold">ชำระเงินและแนบสลิป</div><div class="text-sm text-slate-500 mt-0.5">อัปโหลดหลักฐานการโอน</div></div></div>
+              <div class="flex items-start gap-4"><div class="step-num flex-shrink-0">6</div><div><div class="font-bold">รออีเมลยืนยัน</div><div class="text-sm text-slate-500 mt-0.5">ตรวจสอบภายใน 24 ชั่วโมง</div></div></div>
+              <div class="flex items-start gap-4 md:col-span-2"><div class="step-num flex-shrink-0">7</div><div><div class="font-bold">เริ่มเรียนได้เลย</div><div class="text-sm text-slate-500 mt-0.5">เข้าสู่ระบบและกดเรียนได้ทันที</div></div></div>
+            </div>
+
+            <div class="rounded-xl bg-gradient-to-br from-orange-50 to-amber-50 border border-orange-200 p-6">
+              <h4 class="font-bold mb-4 flex items-center gap-2"><i data-lucide="landmark" class="w-5 h-5 text-brand"></i>บัญชีสำหรับโอนเงิน</h4>
+              <div class="grid sm:grid-cols-3 gap-4 text-sm">
+                <div><div class="text-slate-500 text-xs uppercase tracking-wide">ธนาคาร</div><div class="font-bold mt-1">กสิกรไทย (K-BANK)</div></div>
+                <div><div class="text-slate-500 text-xs uppercase tracking-wide">เลขบัญชี</div><div class="font-bold mt-1 flex items-center gap-2">050-8-91497-0 <i data-lucide="copy" class="w-4 h-4 text-brand cursor-pointer"></i></div></div>
+                <div><div class="text-slate-500 text-xs uppercase tracking-wide">ชื่อบัญชี</div><div class="font-bold mt-1">บจก. ไฮเบรนเน็ต เอ็ดดูเคชั่น</div></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Q&A -->
+          <div data-panel="qa" data-group="course" class="tab-panel p-6">
+            <div class="flex items-center justify-between mb-5">
+              <div>
+                <h3 class="font-bold text-lg">คำถาม-คำตอบ</h3>
+                <p class="text-sm text-slate-500 mt-0.5">24 คำถาม จากผู้เรียน</p>
+              </div>
+              <button class="btn btn-primary btn-sm"><i data-lucide="message-square-plus" class="w-4 h-4"></i> ตั้งคำถาม</button>
+            </div>
+
+            <div class="space-y-4">
+              <div class="border border-slate-200 rounded-xl p-5 hover:border-orange-200 transition">
+                <div class="flex items-start gap-3">
+                  <img src="https://i.pravatar.cc/40?img=11" class="w-10 h-10 rounded-full" alt=""/>
+                  <div class="flex-1">
+                    <div class="flex items-center justify-between"><div class="font-bold text-sm">น้องโบ</div><div class="text-xs text-slate-400">3 วันที่แล้ว</div></div>
+                    <p class="text-sm mt-1 text-slate-700">บทที่ 4 เรื่องโมล มีตัวอย่างโจทย์เพิ่มเติมไหมคะ?</p>
+                  </div>
+                </div>
+                <div class="mt-4 pl-13 border-l-2 border-orange-200 ml-5 pl-5 pb-1 pt-3">
+                  <div class="flex items-start gap-3">
+                    <img src="https://i.pravatar.cc/40?img=12" class="w-9 h-9 rounded-full ring-2 ring-orange-300" alt=""/>
+                    <div class="flex-1">
+                      <div class="flex items-center gap-2"><div class="font-bold text-sm">ครูพี่แมกซ์</div><span class="badge badge-orange">ติวเตอร์</span></div>
+                      <p class="text-sm mt-1 text-slate-700">มีโจทย์เพิ่มในเอกสาร "โจทย์ฝึกหัด — โมลและสโตอิจิโอเมตรี.pdf" ที่อัปโหลดไว้ในแท็บเอกสารครับ</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="border border-slate-200 rounded-xl p-5 hover:border-orange-200 transition">
+                <div class="flex items-start gap-3">
+                  <img src="https://i.pravatar.cc/40?img=14" class="w-10 h-10 rounded-full" alt=""/>
+                  <div class="flex-1">
+                    <div class="flex items-center justify-between"><div class="font-bold text-sm">น้องโน้ต</div><div class="text-xs text-slate-400">1 สัปดาห์ที่แล้ว</div></div>
+                    <p class="text-sm mt-1 text-slate-700">หมดอายุคอร์สแล้วต่ออายุได้ไหมครับ?</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT: PURCHASE CARD -->
+      <aside class="lg:sticky lg:top-20 card p-6 shadow-xl border-orange-100">
+        <div class="flex items-end gap-2 mb-1">
+          <div id="coursePrice" class="price-main">… <span class="text-base">฿</span></div>
+        </div>
+
+        <div class="mt-5 grid gap-3">
+          <button id="addToCartBtn" class="btn btn-primary btn-lg w-full">
+            <i data-lucide="shopping-cart" class="w-5 h-5"></i> เพิ่มลงตะกร้า
+          </button>
+          <button id="buyNowBtn" class="btn btn-outline w-full">
+            <i data-lucide="credit-card" class="w-5 h-5"></i> ซื้อทันที
+          </button>
+          <a id="goLearnBtn" href="my-courses.html" class="btn btn-primary btn-lg w-full" style="display:none">
+            <i data-lucide="play-circle" class="w-5 h-5"></i> เข้าเรียนเลย — คุณมีคอร์สนี้แล้ว
+          </a>
+        </div>
+
+        <div class="mt-6 pt-5 border-t border-slate-100">
+          <h4 class="font-bold mb-3 text-sm">คอร์สนี้ประกอบด้วย</h4>
+          <ul id="courseIncludes" class="space-y-2.5 text-sm">
+            <li class="flex items-start gap-2.5"><i data-lucide="play-circle" class="w-4 h-4 text-brand mt-0.5"></i><span id="incLessons">…</span></li>
+            <li class="flex items-start gap-2.5"><i data-lucide="calendar-days" class="w-4 h-4 text-brand mt-0.5"></i><span>เข้าถึงได้<strong>ตลอดชีพ</strong> (หรือเงื่อนไขที่ครูกำหนด)</span></li>
+            <li class="flex items-start gap-2.5"><i data-lucide="shield-check" class="w-4 h-4 text-brand mt-0.5"></i><span>วิดีโอ DRM ป้องกันการดาวน์โหลด</span></li>
+            <li class="flex items-start gap-2.5"><i data-lucide="message-circle" class="w-4 h-4 text-brand mt-0.5"></i><span>ถาม-ตอบกับครูผ่าน Line กลุ่ม</span></li>
+          </ul>
+        </div>
+
+        <div class="mt-5 pt-5 border-t border-slate-100 flex items-center justify-between">
+          <div class="flex gap-2">
+            <button class="w-9 h-9 grid place-items-center rounded-lg hover:bg-orange-50 text-slate-500 hover:text-brand transition"><i data-lucide="heart" class="w-5 h-5"></i></button>
+            <button class="w-9 h-9 grid place-items-center rounded-lg hover:bg-orange-50 text-slate-500 hover:text-brand transition"><i data-lucide="share-2" class="w-5 h-5"></i></button>
+            <button class="w-9 h-9 grid place-items-center rounded-lg hover:bg-orange-50 text-slate-500 hover:text-brand transition"><i data-lucide="bookmark" class="w-5 h-5"></i></button>
+          </div>
+          <div class="text-xs text-slate-400 flex items-center gap-1"><i data-lucide="shield-check" class="w-4 h-4 text-green-600"></i>ปลอดภัย 100%</div>
+        </div>
+      </aside>
+    </div>
+  </main>
+
+  <!-- BOTTOM CONTACT -->
+  <section class="max-w-7xl mx-auto px-4 sm:px-6 mb-12">
+    <div class="card overflow-hidden bg-slate-950 text-white">
+      <div class="relative p-8 md:p-10 flex flex-col md:flex-row items-center gap-6">
+        <div class="blob bg-orange-500" style="width:280px;height:280px;top:-100px;right:-50px;opacity:.3"></div>
+        <div class="flex-1 relative">
+          <h3 class="text-2xl font-extrabold">มีคำถามเกี่ยวกับคอร์สนี้?</h3>
+          <p class="text-slate-300 mt-2">ทีมงานพร้อมตอบทุกคำถามผ่านช่องทางที่สะดวกของคุณ</p>
+        </div>
+        <div class="flex flex-wrap gap-2 relative">
+          <a href="#" class="btn bg-green-600 hover:bg-green-700"><i data-lucide="message-circle" class="w-4 h-4"></i> Line</a>
+          <a href="#" class="btn bg-emerald-600 hover:bg-emerald-700"><i data-lucide="message-circle-more" class="w-4 h-4"></i> WhatsApp</a>
+          <a href="tel:0957340902" class="btn btn-primary"><i data-lucide="phone" class="w-4 h-4"></i> 095-734-0902</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer class="bg-slate-950 text-slate-400 text-center text-sm py-6">© 2026 HighBrainnet</footer>
+
+  <!-- PREVIEW MODAL -->
+  <div id="previewModal" class="modal-backdrop">
+    <div class="modal-panel" style="max-width:760px;padding:1rem;">
+      <div class="flex items-center justify-between mb-3 px-2">
+        <h3 class="font-bold">ดูตัวอย่างคอร์ส</h3>
+        <button data-modal-close class="w-9 h-9 grid place-items-center rounded-lg hover:bg-slate-100"><i data-lucide="x" class="w-5 h-5"></i></button>
+      </div>
+      <div class="aspect-video bg-slate-900 rounded-xl grid place-items-center text-white relative overflow-hidden">
+        <img src="https://images.unsplash.com/photo-1532094349884-543bc11b234d?w=900&q=80" class="absolute inset-0 w-full h-full object-cover opacity-50" alt=""/>
+        <div class="relative text-center">
+          <i data-lucide="play-circle" class="w-16 h-16 mx-auto text-brand"></i>
+          <p class="mt-2 text-sm text-slate-200">บทที่ 1.1 — องค์ประกอบของสสาร</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <a href="#" class="fab" title="แชทกับเรา"><i data-lucide="message-circle" class="w-6 h-6"></i></a>
+  <script src="assets/js/api.js"></script>
+  <script src="assets/js/cart.js"></script>
+  <script src="assets/js/ui.js"></script>
+  <script src="assets/js/main.js"></script>
+  <script>
+    (async function () {
+      const slug = new URLSearchParams(location.search).get('slug');
+      if (!slug) { location.href = 'courses.html'; return; }
+
+      const esc = (s = '') => String(s).replace(/[&<>"]/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+      const fmtDur = (sec) => {
+        if (!sec) return '';
+        const m = Math.floor(sec / 60), s = sec % 60;
+        return `${m}:${String(s).padStart(2, '0')}`;
+      };
+
+      let course;
+      try {
+        course = (await HBN.api.get(`/courses/${encodeURIComponent(slug)}/tree`)).course;
+      } catch (e) {
+        document.getElementById('courseTitle').textContent = 'ไม่พบคอร์สนี้';
+        document.getElementById('chapterAccordion').innerHTML =
+          `<div class="text-center text-red-500 py-8">${esc(e.message)}</div>`;
+        return;
+      }
+
+      // ----- hero -----
+      document.title = `${course.title} — HighBrainnet`;
+      document.getElementById('bcTitle').textContent = course.title;
+      document.getElementById('courseTitle').textContent = course.title;
+      document.getElementById('courseSubtitle').textContent = course.description || course.subtitle || '';
+      document.getElementById('courseBadges').innerHTML = `
+        <span class="badge badge-orange">${esc(HBN.ui.levelName(course.level?.key))}</span>
+        ${course.currentVersion ? `<span class="badge bg-white/10 text-white border border-white/20">${esc(course.currentVersion.versionLabel)}</span>` : ''}`;
+
+      // ----- chapters -----
+      const totalLessons = course.chapters.reduce((s, ch) => s + ch.lessons.length, 0);
+      const totalSec = course.chapters.reduce(
+        (s, ch) => s + ch.lessons.reduce((x, l) => x + (l.videoDuration || 0), 0), 0);
+      const totalH = Math.floor(totalSec / 3600);
+      document.getElementById('lessonSummary').textContent =
+        `${course.chapters.length} บท · ${totalLessons} บทเรียน${totalH ? ` · ~${totalH} ชั่วโมง` : ''}`;
+      document.getElementById('incLessons').innerHTML =
+        `<strong>${totalLessons} บทเรียน</strong>${totalH ? ` · ~${totalH} ชั่วโมง` : ''}`;
+
+      const accordion = document.getElementById('chapterAccordion');
+      if (!course.chapters.length) {
+        accordion.innerHTML = '<div class="text-center text-slate-400 py-8">เนื้อหากำลังจัดเตรียม เร็วๆ นี้</div>';
+      } else {
+        accordion.innerHTML = course.chapters.map((ch, i) => `
+          <div class="accordion-item ${i === 0 ? 'open' : ''}">
+            <button class="accordion-header">
+              <div class="flex items-center gap-3">
+                <span class="w-8 h-8 rounded-lg ${i === 0 ? 'bg-brand text-white' : 'bg-slate-100'} grid place-items-center text-sm font-bold">${i + 1}</span>
+                <div>
+                  <div>${esc(ch.title)}</div>
+                  <div class="text-xs font-normal text-slate-500 mt-0.5">${ch.lessons.length} บทเรียน</div>
+                </div>
+              </div>
+              <i data-lucide="chevron-down" class="w-5 h-5 accordion-chevron"></i>
+            </button>
+            <div class="accordion-body">
+              ${ch.lessons.map((l) => `
+                <div class="lesson-row">
+                  <div class="flex items-center gap-3">
+                    <i data-lucide="lock" class="w-4 h-4 text-slate-400"></i>
+                    <span>${esc(l.title)}</span>
+                  </div>
+                  <span class="text-slate-500 text-xs">${fmtDur(l.videoDuration)}</span>
+                </div>`).join('')}
+            </div>
+          </div>`).join('');
+      }
+      window.lucide?.createIcons();
+      // re-bind accordions for injected DOM
+      accordion.querySelectorAll('.accordion-header').forEach((h) => {
+        h.addEventListener('click', () => h.parentElement.classList.toggle('open'));
+      });
+
+      // ----- purchase card -----
+      document.getElementById('coursePrice').innerHTML =
+        `${Number(course.price).toLocaleString('th-TH')} <span class="text-base">฿</span>`;
+
+      const cartItem = {
+        itemType: 'course',
+        courseId: course.id,
+        title: course.title,
+        price: Number(course.price),
+        slug: course.slug,
+        coverImageUrl: course.coverImageUrl,
+      };
+
+      // Already enrolled? Show "เข้าเรียน" instead
+      if (HBN.api.isLoggedIn()) {
+        try {
+          const { items } = await HBN.api.get('/enrollments');
+          if (items.some((e) => e.courseId === course.id && e.isActive)) {
+            document.getElementById('addToCartBtn').style.display = 'none';
+            document.getElementById('buyNowBtn').style.display = 'none';
+            document.getElementById('goLearnBtn').style.display = '';
+          }
+        } catch {}
+      }
+
+      document.getElementById('addToCartBtn').addEventListener('click', () => {
+        if (HBN.cart.add(cartItem)) HBN.ui.toast('เพิ่มลงตะกร้าแล้ว 🛒', 'success');
+        else HBN.ui.toast('คอร์สนี้อยู่ในตะกร้าแล้ว');
+      });
+      document.getElementById('buyNowBtn').addEventListener('click', () => {
+        HBN.cart.add(cartItem);
+        location.href = 'checkout.html';
+      });
+    })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,588 @@
+// HighBrainnet — Database schema
+// อ้างอิง: CONTEXT/ARCHITECTURE.md, CONTEXT/SECURITY.md
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================================
+//  ENUMS
+// ============================================================
+enum UserRole {
+  STUDENT
+  ADMIN
+}
+
+enum LevelKey {
+  PRIMARY // ประถมปลาย
+  JUNIOR // มัธยมต้น
+  SENIOR // มัธยมปลาย
+}
+
+enum OrderStatus {
+  PENDING
+  AWAITING_PAYMENT
+  AWAITING_APPROVAL
+  PAID
+  CANCELLED
+  REFUNDED
+  FAILED
+}
+
+enum PaymentMethod {
+  QR_PROMPTPAY
+  MANUAL
+}
+
+enum PaymentStatus {
+  PENDING
+  SUCCESS
+  FAILED
+  REFUNDED
+}
+
+enum QuestionType {
+  MULTIPLE_CHOICE
+  TRUE_FALSE
+  SHORT_ANSWER
+}
+
+enum ExamCreditDisplay {
+  REAL_NAME
+  ALIAS
+}
+
+// ============================================================
+//  USERS
+// ============================================================
+model User {
+  id           String   @id @default(uuid()) @db.Uuid
+  email        String   @unique
+  phone        String?
+  passwordHash String   @map("password_hash")
+  fullName     String   @map("full_name")
+  nickname     String?
+  role         UserRole @default(STUDENT)
+
+  // PDPA
+  pdpaConsent   Boolean   @default(false) @map("pdpa_consent")
+  pdpaConsentAt DateTime? @map("pdpa_consent_at")
+  pdpaVersion   String?   @map("pdpa_version")
+
+  // Single device session
+  sessionToken      String?   @unique @map("session_token")
+  deviceFingerprint String?   @map("device_fingerprint")
+  deviceLabel       String?   @map("device_label")
+  lastLoginAt       DateTime? @map("last_login_at")
+  lastLoginIp       String?   @map("last_login_ip")
+
+  // Soft delete + suspension
+  isSuspended Boolean   @default(false) @map("is_suspended")
+  isDeleted   Boolean   @default(false) @map("is_deleted")
+  deletedAt   DateTime? @map("deleted_at")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  refreshTokens  RefreshToken[]
+  enrollments    Enrollment[]
+  versionAccess  StudentVersionAccess[]
+  watchHistory   WatchHistory[]
+  lessonProgress LessonProgress[]
+  quizResults    QuizResult[]
+  quizAttempts   QuizAttempt[]
+  badges         UserBadge[]
+  orders         Order[]
+  certificates   Certificate[]
+  examCredits    ExamCredit[]
+  approvedOrders Order[]                @relation("ApprovedByAdmin")
+  createdCourses Course[]               @relation("CourseCreatedBy")
+
+  @@index([isDeleted])
+  @@map("users")
+}
+
+model RefreshToken {
+  id        String    @id @default(uuid()) @db.Uuid
+  userId    String    @map("user_id") @db.Uuid
+  tokenHash String    @unique @map("token_hash")
+  expiresAt DateTime  @map("expires_at")
+  revokedAt DateTime? @map("revoked_at")
+  createdAt DateTime  @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("refresh_tokens")
+}
+
+// ============================================================
+//  COURSE STRUCTURE (4 levels)
+//  Level → Course → Chapter → Lesson
+// ============================================================
+model CourseLevel {
+  id          String   @id @default(uuid()) @db.Uuid
+  key         LevelKey @unique
+  name        String
+  description String?
+  sortOrder   Int      @default(0) @map("sort_order")
+
+  isDeleted Boolean   @default(false) @map("is_deleted")
+  deletedAt DateTime? @map("deleted_at")
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+
+  courses Course[]
+
+  @@map("course_levels")
+}
+
+model Course {
+  id            String  @id @default(uuid()) @db.Uuid
+  levelId       String  @map("level_id") @db.Uuid
+  slug          String  @unique
+  title         String
+  subtitle      String?
+  description   String?
+  coverImageUrl String? @map("cover_image_url")
+  price         Decimal @db.Decimal(10, 2)
+
+  // Versioning — pointer to current published version
+  currentVersionId String? @unique @map("current_version_id") @db.Uuid
+
+  createdById String? @map("created_by_id") @db.Uuid
+  isVisible   Boolean @default(true) @map("is_visible")
+
+  isDeleted Boolean   @default(false) @map("is_deleted")
+  deletedAt DateTime? @map("deleted_at")
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+
+  level          CourseLevel     @relation(fields: [levelId], references: [id])
+  createdBy      User?           @relation("CourseCreatedBy", fields: [createdById], references: [id])
+  currentVersion CourseVersion?  @relation("CurrentVersion", fields: [currentVersionId], references: [id])
+  versions       CourseVersion[] @relation("CourseVersions")
+  chapters       Chapter[]
+  enrollments    Enrollment[]
+  packageItems   PackageCourse[]
+  certificates   Certificate[]
+  quizzes        Quiz[]
+
+  @@index([levelId, isDeleted])
+  @@map("courses")
+}
+
+model CourseVersion {
+  id           String    @id @default(uuid()) @db.Uuid
+  courseId     String    @map("course_id") @db.Uuid
+  versionLabel String    @map("version_label") // e.g. "v1.0"
+  releaseNotes String?   @map("release_notes")
+  upgradePrice Decimal   @default(0) @map("upgrade_price") @db.Decimal(10, 2)
+  publishedAt  DateTime? @map("published_at")
+
+  isDeleted Boolean   @default(false) @map("is_deleted")
+  deletedAt DateTime? @map("deleted_at")
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+
+  course        Course                 @relation("CourseVersions", fields: [courseId], references: [id])
+  currentOf     Course?                @relation("CurrentVersion")
+  enrollments   Enrollment[]
+  versionAccess StudentVersionAccess[]
+
+  @@unique([courseId, versionLabel])
+  @@index([courseId, isDeleted])
+  @@map("course_versions")
+}
+
+model Chapter {
+  id          String  @id @default(uuid()) @db.Uuid
+  courseId    String  @map("course_id") @db.Uuid
+  title       String
+  description String?
+  sortOrder   Int     @default(0) @map("sort_order")
+  isVisible   Boolean @default(true) @map("is_visible")
+
+  isDeleted Boolean   @default(false) @map("is_deleted")
+  deletedAt DateTime? @map("deleted_at")
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+
+  course  Course   @relation(fields: [courseId], references: [id])
+  lessons Lesson[]
+
+  @@index([courseId, sortOrder])
+  @@index([courseId, isDeleted])
+  @@map("chapters")
+}
+
+model Lesson {
+  id          String  @id @default(uuid()) @db.Uuid
+  chapterId   String  @map("chapter_id") @db.Uuid
+  title       String
+  description String?
+  sortOrder   Int     @default(0) @map("sort_order")
+
+  // Video info (Bunny.net)
+  bunnyVideoId  String? @map("bunny_video_id")
+  videoDuration Int?    @map("video_duration") // seconds
+  videoStatus   String? @map("video_status") // uploading | ready | failed
+
+  isVisible Boolean @default(true) @map("is_visible")
+
+  isDeleted Boolean   @default(false) @map("is_deleted")
+  deletedAt DateTime? @map("deleted_at")
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+
+  chapter      Chapter          @relation(fields: [chapterId], references: [id])
+  watchHistory WatchHistory[]
+  progress     LessonProgress[]
+  quizzes      Quiz[]
+
+  @@index([chapterId, sortOrder])
+  @@index([chapterId, isDeleted])
+  @@map("lessons")
+}
+
+// ============================================================
+//  QUIZ
+// ============================================================
+model Quiz {
+  id               String  @id @default(uuid()) @db.Uuid
+  lessonId         String? @map("lesson_id") @db.Uuid // ผูกกับ lesson (pre/post)
+  courseId         String? @map("course_id") @db.Uuid // ผูกกับ course (mock exam) — ต้องมีอย่างใดอย่างหนึ่ง
+  title            String
+  description      String?
+  isMockExam       Boolean @default(false) @map("is_mock_exam")
+  hasTimer         Boolean @default(false) @map("has_timer")
+  timeLimitMinutes Int?    @map("time_limit_minutes")
+  passScore        Int?    @map("pass_score") // percent
+  isPreLesson      Boolean @default(false) @map("is_pre_lesson")
+
+  isDeleted Boolean   @default(false) @map("is_deleted")
+  deletedAt DateTime? @map("deleted_at")
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+
+  lesson    Lesson?       @relation(fields: [lessonId], references: [id])
+  course    Course?       @relation(fields: [courseId], references: [id])
+  questions Question[]
+  attempts  QuizAttempt[]
+  results   QuizResult[]
+
+  @@index([lessonId])
+  @@index([courseId])
+  @@map("quizzes")
+}
+
+model QuizAttempt {
+  id          String    @id @default(uuid()) @db.Uuid
+  userId      String    @map("user_id") @db.Uuid
+  quizId      String    @map("quiz_id") @db.Uuid
+  startedAt   DateTime  @default(now()) @map("started_at")
+  submittedAt DateTime? @map("submitted_at")
+
+  user User @relation(fields: [userId], references: [id])
+  quiz Quiz @relation(fields: [quizId], references: [id])
+
+  @@index([userId, quizId])
+  @@map("quiz_attempts")
+}
+
+model Question {
+  id            String       @id @default(uuid()) @db.Uuid
+  quizId        String       @map("quiz_id") @db.Uuid
+  type          QuestionType @default(MULTIPLE_CHOICE)
+  prompt        String
+  options       Json? // [{key, text}]
+  correctAnswer Json         @map("correct_answer")
+  explanation   String?
+  points        Int          @default(1)
+  sortOrder     Int          @default(0) @map("sort_order")
+
+  isDeleted Boolean   @default(false) @map("is_deleted")
+  deletedAt DateTime? @map("deleted_at")
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+
+  quiz Quiz @relation(fields: [quizId], references: [id])
+
+  @@index([quizId, sortOrder])
+  @@map("questions")
+}
+
+// ============================================================
+//  ENROLLMENT, PROGRESS, ACCESS
+// ============================================================
+model Enrollment {
+  id         String    @id @default(uuid()) @db.Uuid
+  userId     String    @map("user_id") @db.Uuid
+  courseId   String    @map("course_id") @db.Uuid
+  versionId  String    @map("version_id") @db.Uuid
+  orderId    String?   @map("order_id") @db.Uuid
+  isLifetime Boolean   @default(true) @map("is_lifetime")
+  expiresAt  DateTime? @map("expires_at")
+  enrolledAt DateTime  @default(now()) @map("enrolled_at")
+
+  isDeleted Boolean   @default(false) @map("is_deleted")
+  deletedAt DateTime? @map("deleted_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+
+  user    User          @relation(fields: [userId], references: [id])
+  course  Course        @relation(fields: [courseId], references: [id])
+  version CourseVersion @relation(fields: [versionId], references: [id])
+  order   Order?        @relation(fields: [orderId], references: [id])
+
+  @@unique([userId, courseId, versionId])
+  @@index([userId, isDeleted])
+  @@map("enrollments")
+}
+
+model StudentVersionAccess {
+  id        String    @id @default(uuid()) @db.Uuid
+  userId    String    @map("user_id") @db.Uuid
+  versionId String    @map("version_id") @db.Uuid
+  grantedAt DateTime  @default(now()) @map("granted_at")
+  expiresAt DateTime? @map("expires_at")
+
+  user    User          @relation(fields: [userId], references: [id])
+  version CourseVersion @relation(fields: [versionId], references: [id])
+
+  @@unique([userId, versionId])
+  @@map("student_version_access")
+}
+
+model WatchHistory {
+  id                  String   @id @default(uuid()) @db.Uuid
+  userId              String   @map("user_id") @db.Uuid
+  lessonId            String   @map("lesson_id") @db.Uuid
+  lastPositionSeconds Int      @default(0) @map("last_position_seconds")
+  totalWatchedSeconds Int      @default(0) @map("total_watched_seconds")
+  updatedAt           DateTime @updatedAt @map("updated_at")
+
+  user   User   @relation(fields: [userId], references: [id])
+  lesson Lesson @relation(fields: [lessonId], references: [id])
+
+  @@unique([userId, lessonId])
+  @@map("watch_history")
+}
+
+model LessonProgress {
+  id          String    @id @default(uuid()) @db.Uuid
+  userId      String    @map("user_id") @db.Uuid
+  lessonId    String    @map("lesson_id") @db.Uuid
+  isWatched   Boolean   @default(false) @map("is_watched")
+  isCompleted Boolean   @default(false) @map("is_completed")
+  completedAt DateTime? @map("completed_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+
+  user   User   @relation(fields: [userId], references: [id])
+  lesson Lesson @relation(fields: [lessonId], references: [id])
+
+  @@unique([userId, lessonId])
+  @@map("lesson_progress")
+}
+
+model QuizResult {
+  id              String   @id @default(uuid()) @db.Uuid
+  userId          String   @map("user_id") @db.Uuid
+  quizId          String   @map("quiz_id") @db.Uuid
+  score           Int
+  maxScore        Int      @map("max_score")
+  percentage      Float
+  timeUsedSeconds Int?     @map("time_used_seconds")
+  answers         Json // [{questionId, given, correct}]
+  isPassed        Boolean  @default(false) @map("is_passed")
+  takenAt         DateTime @default(now()) @map("taken_at")
+
+  user User @relation(fields: [userId], references: [id])
+  quiz Quiz @relation(fields: [quizId], references: [id])
+
+  @@index([userId, quizId])
+  @@map("quiz_results")
+}
+
+// ============================================================
+//  PAYMENTS, ORDERS, PACKAGES
+// ============================================================
+model Order {
+  id             String        @id @default(uuid()) @db.Uuid
+  userId         String        @map("user_id") @db.Uuid
+  orderNumber    String        @unique @map("order_number")
+  status         OrderStatus   @default(PENDING)
+  paymentMethod  PaymentMethod @default(QR_PROMPTPAY) @map("payment_method")
+  subtotal       Decimal       @db.Decimal(10, 2)
+  discount       Decimal       @default(0) @db.Decimal(10, 2)
+  amount         Decimal       @db.Decimal(10, 2)
+  idempotencyKey String?       @unique @map("idempotency_key")
+
+  // Approval
+  approvedById String?   @map("approved_by_id") @db.Uuid
+  approvedAt   DateTime? @map("approved_at")
+  notes        String?
+
+  isDeleted Boolean   @default(false) @map("is_deleted")
+  deletedAt DateTime? @map("deleted_at")
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+
+  user        User         @relation(fields: [userId], references: [id])
+  approvedBy  User?        @relation("ApprovedByAdmin", fields: [approvedById], references: [id])
+  items       OrderItem[]
+  payments    Payment[]
+  enrollments Enrollment[]
+
+  @@index([userId])
+  @@index([status])
+  @@map("orders")
+}
+
+model OrderItem {
+  id        String  @id @default(uuid()) @db.Uuid
+  orderId   String  @map("order_id") @db.Uuid
+  itemType  String  @map("item_type") // course | package | upgrade
+  courseId  String? @map("course_id") @db.Uuid
+  versionId String? @map("version_id") @db.Uuid
+  packageId String? @map("package_id") @db.Uuid
+  title     String
+  unitPrice Decimal @map("unit_price") @db.Decimal(10, 2)
+  quantity  Int     @default(1)
+  amount    Decimal @db.Decimal(10, 2)
+
+  order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@index([orderId])
+  @@map("order_items")
+}
+
+model Payment {
+  id             String        @id @default(uuid()) @db.Uuid
+  orderId        String        @map("order_id") @db.Uuid
+  status         PaymentStatus @default(PENDING)
+  amount         Decimal       @db.Decimal(10, 2)
+  gateway        String        @default("gbprimepay")
+  gatewayRef     String?       @unique @map("gateway_ref")
+  webhookPayload Json?         @map("webhook_payload")
+  paidAt         DateTime?     @map("paid_at")
+  slipImageUrl   String?       @map("slip_image_url") // manual approval
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  order Order @relation(fields: [orderId], references: [id])
+
+  @@index([orderId])
+  @@map("payments")
+}
+
+model Package {
+  id            String  @id @default(uuid()) @db.Uuid
+  slug          String  @unique
+  title         String
+  description   String?
+  originalPrice Decimal @map("original_price") @db.Decimal(10, 2)
+  discountPrice Decimal @map("discount_price") @db.Decimal(10, 2)
+  coverImageUrl String? @map("cover_image_url")
+
+  isDeleted Boolean   @default(false) @map("is_deleted")
+  deletedAt DateTime? @map("deleted_at")
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+
+  courses PackageCourse[]
+
+  @@map("packages")
+}
+
+model PackageCourse {
+  packageId String @map("package_id") @db.Uuid
+  courseId  String @map("course_id") @db.Uuid
+
+  package Package @relation(fields: [packageId], references: [id], onDelete: Cascade)
+  course  Course  @relation(fields: [courseId], references: [id])
+
+  @@id([packageId, courseId])
+  @@map("package_courses")
+}
+
+// ============================================================
+//  EXAM CREDITS & CERTIFICATES
+// ============================================================
+model ExamCredit {
+  id          String            @id @default(uuid()) @db.Uuid
+  userId      String?           @map("user_id") @db.Uuid
+  realName    String            @map("real_name")
+  alias       String?
+  schoolName  String            @map("school_name")
+  examYear    Int               @map("exam_year")
+  examName    String?           @map("exam_name")
+  displayType ExamCreditDisplay @default(ALIAS) @map("display_type")
+  isPublic    Boolean           @default(true) @map("is_public")
+  sortOrder   Int               @default(0) @map("sort_order")
+
+  isDeleted Boolean   @default(false) @map("is_deleted")
+  deletedAt DateTime? @map("deleted_at")
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+
+  user User? @relation(fields: [userId], references: [id])
+
+  @@index([isPublic, isDeleted])
+  @@map("exam_credits")
+}
+
+model Certificate {
+  id              String   @id @default(uuid()) @db.Uuid
+  userId          String   @map("user_id") @db.Uuid
+  courseId        String   @map("course_id") @db.Uuid
+  certificateCode String   @unique @map("certificate_code")
+  issuedAt        DateTime @default(now()) @map("issued_at")
+  pdfUrl          String?  @map("pdf_url")
+
+  user   User   @relation(fields: [userId], references: [id])
+  course Course @relation(fields: [courseId], references: [id])
+
+  @@unique([userId, courseId])
+  @@map("certificates")
+}
+
+// ============================================================
+//  GAMIFICATION
+// ============================================================
+model UserBadge {
+  id       String   @id @default(uuid()) @db.Uuid
+  userId   String   @map("user_id") @db.Uuid
+  code     String // อ้างอิง catalog ใน src/services/badge.service.js
+  earnedAt DateTime @default(now()) @map("earned_at")
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@unique([userId, code])
+  @@map("user_badges")
+}
+
+// ============================================================
+//  AUDIT LOG (immutable)
+// ============================================================
+model AuditLog {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String?  @map("user_id") @db.Uuid
+  action    String
+  entity    String?
+  entityId  String?  @map("entity_id")
+  metadata  Json?
+  ipAddress String?  @map("ip_address")
+  userAgent String?  @map("user_agent")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([userId])
+  @@index([entity, entityId])
+  @@map("audit_logs")
+}

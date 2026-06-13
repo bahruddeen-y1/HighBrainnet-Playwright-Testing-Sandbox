@@ -1,0 +1,349 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>คอร์สของฉัน — HighBrainnet</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=Sarabun:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <link rel="stylesheet" href="assets/css/styles.css" />
+</head>
+<body class="bg-slate-50">
+
+  <header class="sticky top-0 z-40 glass-nav">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 flex items-center justify-between h-16">
+      <a href="index.html" class="flex items-center gap-2.5">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-orange-400 to-orange-600 grid place-items-center text-white font-extrabold">H</div>
+        <div class="leading-tight"><div class="font-extrabold text-[15px]">HighBrainnet</div><div class="text-[10px] text-slate-500 -mt-0.5">เรียนรู้แบบ Concept</div></div>
+      </a>
+      <nav class="hidden md:flex items-center gap-7 text-sm font-medium text-slate-700">
+        <a href="index.html" class="hover:text-brand">หน้าแรก</a>
+        <a href="courses.html" class="hover:text-brand">คอร์สเรียน</a>
+        <a href="my-courses.html" class="text-brand">คอร์สของฉัน</a>
+      </nav>
+      <div class="flex items-center gap-3">
+        <a href="cart.html" class="relative w-10 h-10 grid place-items-center rounded-lg hover:bg-slate-100">
+          <i data-lucide="shopping-cart" class="w-5 h-5"></i>
+          <span data-cart-badge class="absolute top-1 right-1 w-4 h-4 text-[10px] grid place-items-center bg-brand text-white rounded-full font-bold" style="display:none">0</span>
+        </a>
+        <span class="hidden sm:inline text-sm font-medium" data-user-name></span>
+        <a href="#" data-logout class="btn btn-ghost btn-sm">ออกจากระบบ</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 py-8">
+
+    <!-- Greeting -->
+    <div class="mb-6">
+      <h1 class="text-3xl font-bold">สวัสดี, <span data-user-name>…</span> 👋</h1>
+      <p class="text-slate-500 mt-1">ยินดีต้อนรับกลับมา มาเรียนต่อกันเลย!</p>
+    </div>
+
+    <!-- Stats cards -->
+    <div id="statsCards" class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6"></div>
+
+    <!-- Continue watching -->
+    <div id="continueBox" class="mb-6"></div>
+
+    <!-- Badges -->
+    <div id="badgesBox" class="mb-8"></div>
+
+    <!-- Upgrade banners -->
+    <div id="upgradeBanners" class="grid gap-3 mb-6"></div>
+
+    <!-- Courses -->
+    <h2 class="font-bold text-lg mb-4">คอร์สของฉัน</h2>
+    <div id="enrollGrid" class="grid lg:grid-cols-2 gap-5">
+      <div class="col-span-full text-center text-slate-400 py-12">กำลังโหลด...</div>
+    </div>
+
+    <!-- Pending orders -->
+    <div id="pendingSection" class="mt-10 hidden">
+      <h2 class="font-bold text-lg mb-4">คำสั่งซื้อรอดำเนินการ</h2>
+      <div id="pendingOrders" class="grid gap-3"></div>
+    </div>
+
+    <!-- Recent quiz scores -->
+    <div id="quizSection2" class="mt-10 hidden">
+      <h2 class="font-bold text-lg mb-4">คะแนนแบบทดสอบล่าสุด</h2>
+      <div id="recentQuizzes" class="card divide-y divide-slate-100"></div>
+    </div>
+
+    <!-- Order history (PAID + receipts) -->
+    <div id="historySection" class="mt-10 hidden">
+      <h2 class="font-bold text-lg mb-4">ประวัติการสั่งซื้อ</h2>
+      <div id="paidOrders" class="grid gap-3"></div>
+    </div>
+
+  </main>
+
+  <script src="assets/js/api.js"></script>
+  <script src="assets/js/cart.js"></script>
+  <script src="assets/js/ui.js"></script>
+  <script src="assets/js/main.js"></script>
+  <script>
+    (async function () {
+      if (!HBN.api.requireLogin('my-courses.html')) return;
+      const esc = (s = '') => String(s).replace(/[&<>"]/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+      // ----- dashboard + enrollments (โหลดคู่ขนาน) -----
+      const grid = document.getElementById('enrollGrid');
+      let enrollments = [];
+      let dash = null;
+      try {
+        [enrollments, dash] = await Promise.all([
+          HBN.api.get('/enrollments').then((r) => r.items),
+          HBN.api.get('/me/dashboard').catch(() => null),
+        ]);
+      } catch (e) {
+        grid.innerHTML = `<div class="col-span-full text-center text-red-500 py-12">${esc(e.message)}</div>`;
+        return;
+      }
+
+      // ----- stats cards -----
+      if (dash) {
+        const s = dash.summary;
+        document.getElementById('statsCards').innerHTML = [
+          ['book-open', 'orange', s.courses, 'คอร์สทั้งหมด'],
+          ['check-circle', 'green', s.lessonsCompleted, 'บทเรียนที่จบ'],
+          ['clipboard-check', 'blue', `${s.quizPassed}/${s.quizAttempts}`, 'Quiz ที่ผ่าน'],
+          ['medal', 'purple', s.badges, 'เหรียญรางวัล'],
+        ].map(([icon, color, val, label]) => `
+          <div class="card p-5"><div class="flex items-center gap-3">
+            <div class="w-11 h-11 rounded-lg bg-${color}-100 grid place-items-center">
+              <i data-lucide="${icon}" class="w-5 h-5 text-${color === 'orange' ? 'brand' : color + '-600'}"></i>
+            </div>
+            <div><div class="text-2xl font-bold">${val}</div><div class="text-xs text-slate-500">${label}</div></div>
+          </div></div>`).join('');
+
+        // ----- continue watching -----
+        if (dash.continueWatching) {
+          const cw = dash.continueWatching;
+          const pct = cw.duration ? Math.round((cw.resumeAt / cw.duration) * 100) : 0;
+          document.getElementById('continueBox').innerHTML = `
+            <a href="player.html?slug=${encodeURIComponent(cw.courseSlug)}"
+               class="card card-hover p-5 flex items-center gap-4 border-orange-200 bg-gradient-to-r from-orange-50 to-white">
+              <div class="w-14 h-14 rounded-full bg-brand text-white grid place-items-center flex-shrink-0">
+                <i data-lucide="play" class="w-7 h-7 ml-0.5"></i>
+              </div>
+              <div class="flex-1 min-w-0">
+                <div class="text-xs text-brand font-bold uppercase tracking-wide">เรียนต่อจากครั้งที่แล้ว</div>
+                <div class="font-bold truncate">${esc(cw.lessonTitle)}</div>
+                <div class="text-sm text-slate-500 truncate">${esc(cw.courseTitle)}</div>
+                <div class="progress mt-2"><div class="progress-bar" style="width:${pct}%"></div></div>
+              </div>
+            </a>`;
+        }
+
+        // ----- badges strip -----
+        if (dash.badgeCatalog?.length) {
+          const earned = Object.fromEntries(dash.badges.map((b) => [b.code, b]));
+          document.getElementById('badgesBox').innerHTML = `
+            <h2 class="font-bold text-lg mb-3">เหรียญรางวัลของฉัน</h2>
+            <div class="flex gap-3 overflow-x-auto pb-2">
+              ${dash.badgeCatalog.map((b) => {
+                const got = earned[b.code];
+                return `
+                  <div class="card p-4 min-w-[120px] text-center flex-shrink-0 ${got ? (got.isNew ? 'ring-2 ring-brand' : '') : 'opacity-40 grayscale'}"
+                       title="${esc(b.description)}${got ? '' : ' (ยังไม่ได้รับ)'}">
+                    <div class="text-3xl">${b.emoji}</div>
+                    <div class="text-xs font-bold mt-1">${esc(b.title)}</div>
+                    ${got?.isNew ? '<div class="badge badge-orange mt-1">ใหม่!</div>' : ''}
+                  </div>`;
+              }).join('')}
+            </div>`;
+          const newOnes = dash.badges.filter((b) => b.isNew);
+          if (newOnes.length) {
+            HBN.ui.toast(`ได้เหรียญใหม่ ${newOnes.map((b) => b.emoji + ' ' + b.title).join(', ')} 🎉`, 'success');
+          }
+        }
+
+        // ----- recent quizzes -----
+        if (dash.recentQuizzes?.length) {
+          document.getElementById('quizSection2').classList.remove('hidden');
+          document.getElementById('recentQuizzes').innerHTML = dash.recentQuizzes.map((r) => `
+            <div class="p-4 flex items-center gap-4">
+              <div class="w-10 h-10 rounded-full ${r.isPassed ? 'bg-green-100' : 'bg-red-100'} grid place-items-center">
+                <i data-lucide="${r.isPassed ? 'check' : 'x'}" class="w-5 h-5 ${r.isPassed ? 'text-green-600' : 'text-red-500'}"></i>
+              </div>
+              <div class="flex-1 min-w-0">
+                <div class="font-semibold truncate">${esc(r.quiz.title)} ${r.quiz.isMockExam ? '<span class="badge badge-orange">Mock</span>' : ''}</div>
+                <div class="text-xs text-slate-500">${new Date(r.takenAt).toLocaleString('th-TH')}</div>
+              </div>
+              <div class="text-right">
+                <div class="font-bold ${r.isPassed ? 'text-green-600' : 'text-red-500'}">${r.score}/${r.maxScore}</div>
+                <div class="text-xs text-slate-400">${r.percentage}%</div>
+              </div>
+            </div>`).join('');
+        }
+      }
+
+      // per-course progress map จาก dashboard
+      const progressByCourse = Object.fromEntries(
+        (dash?.courses || []).map((c) => [c.course.id, c.progress]));
+
+      if (!enrollments.length) {
+        grid.innerHTML = `<div class="col-span-full card p-10 text-center text-slate-400">
+          ยังไม่มีคอร์ส — <a href="courses.html" class="text-brand font-semibold">เลือกคอร์สแรกของคุณเลย</a></div>`;
+      } else {
+        grid.innerHTML = enrollments.map((e) => {
+          const prog = progressByCourse[e.courseId] || { completed: 0, total: 0, percent: 0 };
+          return `
+          <div class="card overflow-hidden ${e.isActive ? '' : 'opacity-60'}">
+            <div class="flex">
+              <div class="w-36 bg-orange-50 grid place-items-center text-brand font-extrabold text-3xl overflow-hidden">
+                ${e.course.coverImageUrl ? `<img src="${esc(e.course.coverImageUrl)}" class="w-full h-full object-cover"/>` : 'H'}
+              </div>
+              <div class="p-4 flex-1">
+                <div class="flex items-center gap-2 mb-1">
+                  <span class="badge badge-blue">${esc(HBN.ui.levelName(e.course.level?.key))}</span>
+                  <span class="badge bg-slate-100 text-slate-600">${esc(e.version.versionLabel)}</span>
+                  ${e.isActive ? '' : '<span class="badge badge-red">หมดอายุ</span>'}
+                  ${prog.total > 0 && prog.completed >= prog.total ? '<span class="badge badge-green">เรียนจบแล้ว</span>' : ''}
+                </div>
+                <h3 class="font-bold leading-snug">${esc(e.course.title)}</h3>
+                <div class="mt-2">
+                  <div class="flex justify-between text-xs text-slate-500 mb-1">
+                    <span>ความคืบหน้า ${prog.completed}/${prog.total} บท</span><span class="font-bold">${prog.percent}%</span>
+                  </div>
+                  <div class="progress"><div class="progress-bar" style="width:${prog.percent}%"></div></div>
+                </div>
+                <div class="flex items-center gap-3 mt-2 text-xs text-slate-500">
+                  ${e.isLifetime
+                    ? '<span class="flex items-center gap-1"><i data-lucide="infinity" class="w-3 h-3"></i>ตลอดชีพ</span>'
+                    : `<span class="flex items-center gap-1"><i data-lucide="calendar" class="w-3 h-3"></i>ถึง ${new Date(e.expiresAt).toLocaleDateString('th-TH')}</span>`}
+                </div>
+                <div class="flex flex-wrap gap-2 mt-4">
+                  <a href="player.html?slug=${encodeURIComponent(e.course.slug)}" class="btn btn-primary text-sm ${e.isActive ? '' : 'pointer-events-none opacity-50'}">
+                    <i data-lucide="play" class="w-4 h-4"></i> เข้าเรียน
+                  </a>
+                  <button data-cert-course="${e.courseId}" class="btn btn-outline text-sm">
+                    <i data-lucide="award" class="w-4 h-4"></i> <span data-cert-label>ใบประกาศ</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>`;
+        }).join('');
+      }
+
+      // ----- upgrade banners -----
+      const banners = enrollments.filter((e) => e.hasUpgradeAvailable && e.upgrade);
+      if (banners.length) {
+        document.getElementById('upgradeBanners').innerHTML = banners.map((e) => `
+          <div class="card p-4 border-orange-200 bg-orange-50 flex flex-wrap items-center gap-3">
+            <i data-lucide="sparkles" class="w-5 h-5 text-brand"></i>
+            <div class="flex-1 text-sm">
+              <strong>${esc(e.course.title)}</strong> มีเวอร์ชันใหม่ <strong>${esc(e.upgrade.versionLabel)}</strong>
+              — อัปเกรดเพียง <strong class="text-brand">${HBN.ui.bahts(e.upgrade.upgradePrice)}</strong>
+            </div>
+            <button class="btn btn-primary btn-sm" data-upgrade='${JSON.stringify({
+              itemType: 'upgrade', courseId: e.courseId, versionId: e.course.currentVersionId,
+              title: e.course.title + ' — Upgrade ' + e.upgrade.versionLabel,
+              price: Number(e.upgrade.upgradePrice),
+            }).replace(/'/g, '&#39;')}'>อัปเกรดเลย</button>
+          </div>`).join('');
+
+        document.querySelectorAll('[data-upgrade]').forEach((btn) => {
+          btn.addEventListener('click', () => {
+            HBN.cart.add(JSON.parse(btn.dataset.upgrade));
+            location.href = 'checkout.html';
+          });
+        });
+      }
+
+      // ----- pending orders -----
+      try {
+        const { items: orders } = await HBN.api.get('/orders?status=AWAITING_PAYMENT');
+        const { items: pendingManual } = await HBN.api.get('/orders?status=PENDING');
+        const all = [...orders, ...pendingManual];
+        if (all.length) {
+          document.getElementById('pendingSection').classList.remove('hidden');
+          document.getElementById('pendingOrders').innerHTML = all.map((o) => `
+            <div class="card p-5 flex items-center gap-4">
+              <div class="w-12 h-12 rounded-full bg-amber-100 grid place-items-center">
+                <i data-lucide="hourglass" class="w-6 h-6 text-amber-600"></i>
+              </div>
+              <div class="flex-1">
+                <div class="font-bold">${esc(o.orderNumber)}</div>
+                <p class="text-sm text-slate-500">${o.items.map((i) => esc(i.title)).join(', ')} · ${HBN.ui.bahts(o.amount)}</p>
+              </div>
+              <span class="badge badge-orange">${o.status === 'AWAITING_PAYMENT' ? 'รอชำระ' : 'รอตรวจสอบ'}</span>
+            </div>`).join('');
+        }
+      } catch {}
+
+      // ----- order history + receipts -----
+      try {
+        const { items: paid } = await HBN.api.get('/orders?status=PAID');
+        if (paid.length) {
+          document.getElementById('historySection').classList.remove('hidden');
+          document.getElementById('paidOrders').innerHTML = paid.map((o) => `
+            <div class="card p-5 flex items-center gap-4">
+              <div class="w-12 h-12 rounded-full bg-green-100 grid place-items-center">
+                <i data-lucide="check" class="w-6 h-6 text-green-600"></i>
+              </div>
+              <div class="flex-1">
+                <div class="font-bold">${esc(o.orderNumber)}</div>
+                <p class="text-sm text-slate-500">${o.items.map((i) => esc(i.title)).join(', ')} · ${HBN.ui.bahts(o.amount)} · ${new Date(o.createdAt).toLocaleDateString('th-TH')}</p>
+              </div>
+              <button data-receipt="${o.id}" data-num="${esc(o.orderNumber)}" class="btn btn-outline btn-sm">
+                <i data-lucide="file-down" class="w-4 h-4"></i> ใบเสร็จ
+              </button>
+            </div>`).join('');
+
+          document.querySelectorAll('[data-receipt]').forEach((btn) => {
+            btn.addEventListener('click', async () => {
+              btn.disabled = true;
+              try {
+                await HBN.api.downloadFile(`/orders/${btn.dataset.receipt}/receipt.pdf`, `receipt-${btn.dataset.num}.pdf`);
+              } catch (e) { HBN.ui.toast(e.message, 'error'); }
+              btn.disabled = false;
+            });
+          });
+        }
+      } catch {}
+
+      // ----- certificates -----
+      try {
+        const { items: certs } = await HBN.api.get('/certificates');
+        const certByCourse = Object.fromEntries(certs.map((c) => [c.course.id, c]));
+
+        document.querySelectorAll('[data-cert-course]').forEach((btn) => {
+          const courseId = btn.dataset.certCourse;
+          const cert = certByCourse[courseId];
+          const label = btn.querySelector('[data-cert-label]');
+          if (cert) label.textContent = 'ดาวน์โหลดใบประกาศ';
+
+          btn.addEventListener('click', async () => {
+            btn.disabled = true;
+            try {
+              let target = certByCourse[courseId];
+              if (!target) {
+                // check eligibility → claim
+                const el = await HBN.api.get(`/certificates/eligibility/${courseId}`);
+                if (!el.eligible) {
+                  HBN.ui.toast(el.reason || 'ยังไม่ผ่านเงื่อนไขรับใบประกาศ', 'error');
+                  btn.disabled = false;
+                  return;
+                }
+                const claimed = await HBN.api.post(`/certificates/claim/${courseId}`, {});
+                target = claimed.certificate;
+                certByCourse[courseId] = target;
+                label.textContent = 'ดาวน์โหลดใบประกาศ';
+                HBN.ui.toast('ออกใบประกาศแล้ว 🎓', 'success');
+              }
+              await HBN.api.downloadFile(`/certificates/${target.id}/pdf`, `certificate-${target.certificateCode}.pdf`);
+            } catch (e) { HBN.ui.toast(e.message, 'error'); }
+            btn.disabled = false;
+          });
+        });
+      } catch {}
+
+      window.lucide?.createIcons();
+    })();
+  </script>
+</body>
+</html>

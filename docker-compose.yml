@@ -1,0 +1,51 @@
+# HighBrainnet — production stack (DigitalOcean droplet)
+# Frontend static files served by nginx, API proxied to backend container.
+
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: highbrainnet
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?set DB_PASSWORD in .env}
+      POSTGRES_DB: highbrainnet
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U highbrainnet"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    # NOTE: ไม่ expose port ออก public ตาม SECURITY.md
+
+  api:
+    build: ./backend
+    restart: unless-stopped
+    env_file: ./backend/.env.production
+    environment:
+      DATABASE_URL: postgresql://highbrainnet:${DB_PASSWORD}@db:5432/highbrainnet?schema=public
+      PORT: 4000
+    depends_on:
+      db:
+        condition: service_healthy
+    expose:
+      - "4000"
+
+  web:
+    image: nginx:alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./:/usr/share/nginx/html:ro          # static frontend (html + assets)
+      - certbot-www:/var/www/certbot
+      - certbot-conf:/etc/letsencrypt
+    depends_on:
+      - api
+
+volumes:
+  pgdata:
+  certbot-www:
+  certbot-conf:

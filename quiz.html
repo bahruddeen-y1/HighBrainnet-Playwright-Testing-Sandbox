@@ -1,0 +1,284 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>แบบทดสอบ — HighBrainnet</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=Sarabun:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <link rel="stylesheet" href="assets/css/styles.css" />
+</head>
+<body class="bg-slate-50">
+
+  <header class="sticky top-0 z-40 bg-white border-b border-slate-200">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 flex items-center justify-between h-16">
+      <a id="backLink" href="my-courses.html" class="text-slate-500 hover:text-brand flex items-center gap-2 text-sm">
+        <i data-lucide="chevron-left" class="w-4 h-4"></i> กลับ
+      </a>
+      <div id="timerBox" class="text-sm text-slate-500 hidden">
+        <i data-lucide="timer" class="w-4 h-4 inline-block"></i> เหลือเวลา <strong id="timerText" class="text-slate-900 ml-1">--:--</strong>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-3xl mx-auto px-4 sm:px-6 py-8">
+
+    <!-- ======== INTRO ======== -->
+    <div id="introView" class="card p-8 text-center">
+      <h1 id="quizTitle" class="text-2xl font-bold">กำลังโหลด...</h1>
+      <p id="quizDesc" class="text-slate-500 mt-2"></p>
+      <div id="quizMeta" class="flex flex-wrap justify-center gap-3 mt-5 text-sm text-slate-600"></div>
+      <div id="historyBox" class="mt-5 text-sm text-slate-500"></div>
+      <button id="startBtn" class="btn btn-primary btn-lg mt-6">
+        <i data-lucide="play" class="w-5 h-5"></i> เริ่มทำแบบทดสอบ
+      </button>
+    </div>
+
+    <!-- ======== TAKING ======== -->
+    <div id="takingView" class="hidden">
+      <div class="card p-5 mb-6">
+        <div class="flex items-center justify-between mb-3">
+          <h1 id="takingTitle" class="font-bold text-lg"></h1>
+          <span id="qCounter" class="badge badge-orange"></span>
+        </div>
+        <div class="progress"><div id="qProgress" class="progress-bar" style="width:0%"></div></div>
+      </div>
+
+      <div class="card p-6">
+        <div id="qPrompt" class="text-xl font-bold leading-snug"></div>
+        <div id="qOptions" class="mt-6 grid gap-3"></div>
+
+        <div class="mt-6 flex items-center justify-between">
+          <button id="prevBtn" class="btn btn-ghost"><i data-lucide="chevron-left" class="w-4 h-4"></i> ก่อนหน้า</button>
+          <div id="qDots" class="flex gap-1 flex-wrap"></div>
+          <button id="nextBtn" class="btn btn-primary">ถัดไป <i data-lucide="chevron-right" class="w-4 h-4"></i></button>
+        </div>
+      </div>
+
+      <button id="submitBtn" class="btn btn-primary btn-lg w-full mt-6">
+        <i data-lucide="check-circle" class="w-5 h-5"></i> ส่งคำตอบ
+      </button>
+    </div>
+
+    <!-- ======== RESULT ======== -->
+    <div id="resultView" class="hidden">
+      <div class="card p-8 text-center mb-6">
+        <div id="resultEmoji" class="text-5xl mb-3"></div>
+        <h2 id="resultHeadline" class="text-2xl font-bold"></h2>
+        <div id="resultScore" class="text-4xl font-extrabold text-brand mt-3"></div>
+        <p id="resultSub" class="text-slate-500 mt-2 text-sm"></p>
+        <div class="flex justify-center gap-2 mt-5">
+          <button id="retryBtn" class="btn btn-outline">ทำอีกครั้ง</button>
+          <a id="resultBackLink" href="my-courses.html" class="btn btn-primary">กลับสู่บทเรียน</a>
+        </div>
+      </div>
+
+      <h3 class="font-bold text-lg mb-3">เฉลยพร้อมคำอธิบาย</h3>
+      <div id="reviewList" class="grid gap-4"></div>
+    </div>
+  </main>
+
+  <script src="assets/js/api.js"></script>
+  <script src="assets/js/cart.js"></script>
+  <script src="assets/js/ui.js"></script>
+  <script src="assets/js/main.js"></script>
+  <script>
+    (async function () {
+      if (!HBN.api.requireLogin()) return;
+      const params = new URLSearchParams(location.search);
+      const quizId = params.get('id');
+      const backSlug = params.get('slug'); // course slug to return to player
+      if (!quizId) { location.href = 'my-courses.html'; return; }
+
+      if (backSlug) {
+        const back = `player.html?slug=${encodeURIComponent(backSlug)}`;
+        document.getElementById('backLink').href = back;
+        document.getElementById('resultBackLink').href = back;
+      }
+
+      const esc = (s = '') => String(s).replace(/[&<>"]/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+      const show = (id) => {
+        ['introView', 'takingView', 'resultView'].forEach((v) =>
+          document.getElementById(v).classList.toggle('hidden', v !== id));
+      };
+
+      let quiz, attemptId, answers = {}, currentQ = 0, timerInterval = null;
+
+      // ----- load -----
+      try {
+        quiz = (await HBN.api.get(`/quizzes/${quizId}`)).quiz;
+      } catch (e) {
+        document.getElementById('quizTitle').textContent = e.message;
+        document.getElementById('startBtn').style.display = 'none';
+        return;
+      }
+
+      document.getElementById('quizTitle').textContent = quiz.title;
+      document.getElementById('quizDesc').textContent = quiz.description || '';
+      document.getElementById('quizMeta').innerHTML = [
+        `<span class="badge badge-blue">${quiz.totalQuestions} ข้อ</span>`,
+        quiz.isMockExam ? '<span class="badge badge-orange">Mock Exam</span>' : '',
+        quiz.hasTimer ? `<span class="badge badge-red">จับเวลา ${quiz.timeLimitMinutes} นาที</span>` : '',
+        quiz.passScore != null ? `<span class="badge badge-green">เกณฑ์ผ่าน ${quiz.passScore}%</span>` : '',
+      ].filter(Boolean).join('');
+      if (quiz.myAttempts > 0) {
+        document.getElementById('historyBox').textContent = `คุณเคยทำแล้ว ${quiz.myAttempts} ครั้ง — ทำซ้ำได้ไม่จำกัด`;
+      }
+
+      // ----- start -----
+      document.getElementById('startBtn').addEventListener('click', start);
+      document.getElementById('retryBtn').addEventListener('click', () => location.reload());
+
+      async function start() {
+        try {
+          const a = await HBN.api.post(`/quizzes/${quizId}/start`, {});
+          attemptId = a.attemptId;
+          answers = {}; currentQ = 0;
+          document.getElementById('takingTitle').textContent = quiz.title;
+          show('takingView');
+          renderQuestion();
+          if (a.hasTimer && a.timeLimitMinutes) startTimer(a.timeLimitMinutes * 60);
+        } catch (e) { HBN.ui.toast(e.message, 'error'); }
+      }
+
+      function startTimer(totalSec) {
+        const box = document.getElementById('timerBox');
+        const text = document.getElementById('timerText');
+        box.classList.remove('hidden');
+        const deadline = Date.now() + totalSec * 1000;
+        timerInterval = setInterval(() => {
+          const left = Math.max(0, Math.floor((deadline - Date.now()) / 1000));
+          const m = Math.floor(left / 60), s = left % 60;
+          text.textContent = `${m}:${String(s).padStart(2, '0')}`;
+          if (left <= 60) text.classList.add('text-red-600');
+          if (left <= 0) {
+            clearInterval(timerInterval);
+            HBN.ui.toast('หมดเวลา! ระบบส่งคำตอบอัตโนมัติ', 'error');
+            submit();
+          }
+        }, 500);
+      }
+
+      // ----- question rendering -----
+      function renderQuestion() {
+        const q = quiz.questions[currentQ];
+        document.getElementById('qCounter').textContent = `ข้อ ${currentQ + 1} / ${quiz.questions.length}`;
+        document.getElementById('qProgress').style.width =
+          `${Math.round(((currentQ + 1) / quiz.questions.length) * 100)}%`;
+        document.getElementById('qPrompt').textContent = q.prompt;
+
+        const box = document.getElementById('qOptions');
+        const sel = answers[q.id];
+
+        if (q.type === 'MULTIPLE_CHOICE') {
+          box.innerHTML = q.options.map((o) => `
+            <button data-answer="${esc(o.key)}" class="flex items-center gap-3 p-4 rounded-lg border-2 text-left transition
+              ${sel === o.key ? 'border-brand bg-brand-soft' : 'border-slate-200 hover:border-brand'}">
+              <span class="w-8 h-8 rounded-full ${sel === o.key ? 'bg-brand text-white' : 'bg-slate-100'} grid place-items-center font-bold">${esc(o.key)}</span>
+              <span>${esc(o.text)}</span>
+            </button>`).join('');
+        } else if (q.type === 'TRUE_FALSE') {
+          box.innerHTML = [[true, 'ถูก ✓'], [false, 'ผิด ✗']].map(([v, label]) => `
+            <button data-answer-bool="${v}" class="p-4 rounded-lg border-2 font-bold text-center transition
+              ${sel === v ? 'border-brand bg-brand-soft' : 'border-slate-200 hover:border-brand'}">${label}</button>`).join('');
+        } else {
+          box.innerHTML = `
+            <input id="shortAnswer" value="${sel != null ? esc(String(sel)) : ''}"
+              placeholder="พิมพ์คำตอบ..." class="w-full px-4 py-3 rounded-lg border-2 border-slate-200 focus:border-brand focus:outline-none"/>`;
+          document.getElementById('shortAnswer').addEventListener('input', (e) => {
+            answers[q.id] = e.target.value;
+            renderDots();
+          });
+        }
+
+        box.querySelectorAll('[data-answer]').forEach((b) =>
+          b.addEventListener('click', () => { answers[q.id] = b.dataset.answer; renderQuestion(); }));
+        box.querySelectorAll('[data-answer-bool]').forEach((b) =>
+          b.addEventListener('click', () => { answers[q.id] = b.dataset.answerBool === 'true'; renderQuestion(); }));
+
+        document.getElementById('prevBtn').style.visibility = currentQ === 0 ? 'hidden' : '';
+        document.getElementById('nextBtn').style.visibility =
+          currentQ === quiz.questions.length - 1 ? 'hidden' : '';
+        renderDots();
+      }
+
+      function renderDots() {
+        document.getElementById('qDots').innerHTML = quiz.questions.map((q, i) => `
+          <button data-jump="${i}" class="w-2.5 h-2.5 rounded-full transition
+            ${i === currentQ ? 'bg-brand scale-125' : (answers[q.id] !== undefined && answers[q.id] !== '') ? 'bg-green-500' : 'bg-slate-300'}"></button>`).join('');
+        document.querySelectorAll('[data-jump]').forEach((d) =>
+          d.addEventListener('click', () => { currentQ = Number(d.dataset.jump); renderQuestion(); }));
+      }
+
+      document.getElementById('prevBtn').addEventListener('click', () => {
+        if (currentQ > 0) { currentQ -= 1; renderQuestion(); }
+      });
+      document.getElementById('nextBtn').addEventListener('click', () => {
+        if (currentQ < quiz.questions.length - 1) { currentQ += 1; renderQuestion(); }
+      });
+
+      // ----- submit -----
+      document.getElementById('submitBtn').addEventListener('click', () => {
+        const unanswered = quiz.questions.filter((q) => answers[q.id] === undefined || answers[q.id] === '').length;
+        if (unanswered > 0 && !confirm(`ยังไม่ได้ตอบ ${unanswered} ข้อ — ส่งเลยไหม?`)) return;
+        submit();
+      });
+
+      let submitting = false;
+      async function submit() {
+        if (submitting) return;
+        submitting = true;
+        if (timerInterval) clearInterval(timerInterval);
+        try {
+          const r = await HBN.api.post(`/quizzes/${quizId}/submit`, {
+            attemptId,
+            answers: quiz.questions.map((q) => ({
+              questionId: q.id,
+              answer: answers[q.id] !== undefined && answers[q.id] !== '' ? answers[q.id] : null,
+            })),
+          });
+          renderResult(r);
+        } catch (e) {
+          HBN.ui.toast(e.message, 'error');
+          submitting = false;
+        }
+      }
+
+      function renderResult(r) {
+        document.getElementById('timerBox').classList.add('hidden');
+        show('resultView');
+
+        document.getElementById('resultEmoji').textContent =
+          r.timedOut ? '⏰' : r.isPassed ? '🎉' : '💪';
+        document.getElementById('resultHeadline').textContent =
+          r.timedOut ? 'หมดเวลา!' : r.isPassed ? 'ผ่านเกณฑ์ เก่งมาก!' : 'ยังไม่ผ่าน — สู้อีกครั้ง!';
+        document.getElementById('resultScore').textContent =
+          `${r.score} / ${r.maxScore} (${r.percentage}%)`;
+        const mins = Math.floor(r.timeUsedSeconds / 60), secs = r.timeUsedSeconds % 60;
+        document.getElementById('resultSub').textContent = `ใช้เวลา ${mins} นาที ${secs} วินาที`;
+
+        document.getElementById('reviewList').innerHTML = r.review.map((q, i) => {
+          const fmt = (v) => v === null || v === undefined ? '—'
+            : typeof v === 'boolean' ? (v ? 'ถูก' : 'ผิด') : String(v);
+          return `
+            <div class="card p-5 border-l-4 ${q.correct ? 'border-l-green-500' : 'border-l-red-400'}">
+              <div class="flex items-start gap-3">
+                <span class="w-7 h-7 rounded-full ${q.correct ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-600'} grid place-items-center text-sm font-bold flex-shrink-0">${i + 1}</span>
+                <div class="flex-1">
+                  <div class="font-semibold">${esc(q.prompt)}</div>
+                  <div class="mt-2 text-sm grid gap-1">
+                    <div>คำตอบของคุณ: <strong class="${q.correct ? 'text-green-600' : 'text-red-500'}">${esc(fmt(q.given))}</strong></div>
+                    ${!q.correct ? `<div>เฉลย: <strong class="text-green-600">${esc(fmt(q.correctAnswer))}</strong></div>` : ''}
+                    ${q.explanation ? `<div class="mt-1 bg-amber-50 border border-amber-200 rounded-lg p-3 text-slate-700"><strong>คำอธิบาย:</strong> ${esc(q.explanation)}</div>` : ''}
+                  </div>
+                </div>
+              </div>
+            </div>`;
+        }).join('');
+        window.lucide?.createIcons();
+      }
+    })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>เข้าสู่ระบบ — HighBrainnet</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=Sarabun:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <link rel="stylesheet" href="assets/css/styles.css" />
+</head>
+<body class="bg-slate-50">
+
+  <div class="min-h-screen grid lg:grid-cols-2">
+
+    <!-- Left side: form -->
+    <div class="flex items-center justify-center p-6 sm:p-10">
+      <div class="w-full max-w-md">
+        <a href="index.html" class="flex items-center gap-2.5 mb-8">
+          <div class="w-11 h-11 rounded-xl bg-gradient-to-br from-orange-400 to-orange-600 grid place-items-center text-white font-extrabold shadow-[0_8px_20px_-8px_rgba(249,115,22,.6)]">H</div>
+          <div class="leading-tight"><div class="font-extrabold text-lg">HighBrainnet</div><div class="text-[11px] text-slate-500 -mt-0.5">เรียนรู้แบบ Concept</div></div>
+        </a>
+
+        <!-- Tabs -->
+        <div data-tabs="auth" class="flex gap-1 p-1 bg-slate-200 rounded-lg mb-6">
+          <button data-tab="signin" class="tab-btn active flex-1 rounded-md py-2 bg-white">เข้าสู่ระบบ</button>
+          <button data-tab="signup" class="tab-btn flex-1 rounded-md py-2">สมัครสมาชิก</button>
+        </div>
+
+        <!-- Sign in -->
+        <div data-panel="signin" data-group="auth" class="tab-panel active">
+          <h1 class="text-2xl font-bold">ยินดีต้อนรับกลับมา 👋</h1>
+          <p class="text-slate-500 mt-1 text-sm">เข้าสู่ระบบเพื่อเรียนต่อ</p>
+
+          <form id="signinForm" class="mt-6 space-y-4">
+            <div>
+              <label class="text-sm font-semibold mb-1 block">อีเมล</label>
+              <input name="email" type="email" required autocomplete="email" class="w-full px-3 py-2.5 rounded-lg border border-slate-200 focus:outline-none focus:ring-2 ring-brand" placeholder="you@email.com"/>
+            </div>
+            <div>
+              <div class="flex items-center justify-between mb-1">
+                <label class="text-sm font-semibold">รหัสผ่าน</label>
+                <a href="#" class="text-xs text-brand font-semibold">ลืมรหัสผ่าน?</a>
+              </div>
+              <input name="password" type="password" required autocomplete="current-password" class="w-full px-3 py-2.5 rounded-lg border border-slate-200 focus:outline-none focus:ring-2 ring-brand" placeholder="••••••••"/>
+            </div>
+            <button type="submit" class="btn btn-primary w-full" id="signinBtn">เข้าสู่ระบบ</button>
+          </form>
+
+          <div class="mt-5 flex items-center gap-3 text-xs text-slate-400">
+            <div class="flex-1 h-px bg-slate-200"></div><span>หรือเข้าสู่ระบบด้วย</span><div class="flex-1 h-px bg-slate-200"></div>
+          </div>
+
+          <div class="mt-4 grid grid-cols-3 gap-2">
+            <button class="btn btn-outline text-sm border-slate-200 text-slate-700">Google</button>
+            <button class="btn btn-outline text-sm border-slate-200 text-slate-700">Facebook</button>
+            <button class="btn btn-outline text-sm border-slate-200 text-slate-700">Line</button>
+          </div>
+        </div>
+
+        <!-- Sign up -->
+        <div data-panel="signup" data-group="auth" class="tab-panel">
+          <h1 class="text-2xl font-bold">สมัครสมาชิกฟรี 🎉</h1>
+          <p class="text-slate-500 mt-1 text-sm">รับส่วนลด 15% สำหรับคอร์สแรก</p>
+
+          <form id="signupForm" class="mt-6 space-y-4">
+            <div>
+              <label class="text-sm font-semibold mb-1 block">ชื่อ-นามสกุล</label>
+              <input name="fullName" required class="w-full px-3 py-2.5 rounded-lg border border-slate-200 focus:outline-none focus:ring-2 ring-brand"/>
+            </div>
+            <div>
+              <label class="text-sm font-semibold mb-1 block">อีเมล</label>
+              <input name="email" type="email" required autocomplete="email" class="w-full px-3 py-2.5 rounded-lg border border-slate-200 focus:outline-none focus:ring-2 ring-brand"/>
+            </div>
+            <div>
+              <label class="text-sm font-semibold mb-1 block">เบอร์โทร</label>
+              <input name="phone" type="tel" class="w-full px-3 py-2.5 rounded-lg border border-slate-200 focus:outline-none focus:ring-2 ring-brand"/>
+            </div>
+            <div>
+              <label class="text-sm font-semibold mb-1 block">รหัสผ่าน (ขั้นต่ำ 8 ตัว)</label>
+              <input name="password" type="password" required minlength="8" autocomplete="new-password" class="w-full px-3 py-2.5 rounded-lg border border-slate-200 focus:outline-none focus:ring-2 ring-brand"/>
+            </div>
+            <label class="flex items-start gap-2 text-xs text-slate-500">
+              <input name="pdpaConsent" type="checkbox" required class="accent-orange-500 mt-0.5" /> ยอมรับ <a href="#" class="text-brand">ข้อตกลงการใช้บริการ</a> และ <a href="#" class="text-brand">นโยบายความเป็นส่วนตัว (PDPA)</a>
+            </label>
+            <button type="submit" class="btn btn-primary w-full" id="signupBtn">สมัครสมาชิก</button>
+          </form>
+        </div>
+
+        <p class="mt-8 text-center text-xs text-slate-400">© 2026 HighBrainnet</p>
+      </div>
+    </div>
+
+    <!-- Right side: brand panel -->
+    <div class="hidden lg:flex flex-col justify-center bg-gradient-to-br from-orange-500 to-orange-600 text-white p-12 relative overflow-hidden">
+      <div class="absolute -top-32 -right-32 w-96 h-96 rounded-full bg-white/10"></div>
+      <div class="absolute -bottom-32 -left-32 w-96 h-96 rounded-full bg-white/5"></div>
+
+      <div class="relative max-w-md">
+        <h2 class="text-4xl font-extrabold leading-tight">เรียนรู้แบบ Concept<br/>ติดทุกสนามสอบ</h2>
+        <p class="mt-4 text-orange-50">เข้าร่วมกับนักเรียนกว่า 12,000 คนที่เลือกใช้ HighBrainnet ในการเตรียมตัวสอบแข่งขัน</p>
+
+        <div class="mt-10 grid gap-4">
+          <div class="bg-white/10 backdrop-blur rounded-xl p-5">
+            <div class="flex items-center gap-3">
+              <img src="https://i.pravatar.cc/40?img=32" class="w-10 h-10 rounded-full border-2 border-white" alt=""/>
+              <div>
+                <div class="font-bold">น้องก้า — เหรียญทอง IJSO</div>
+                <div class="text-xs text-orange-100">รุ่น 2569</div>
+              </div>
+            </div>
+            <p class="text-sm mt-3 text-orange-50">"คอร์สเคมีของพี่แมกซ์ทำให้เข้าใจ Concept ทั้งหมดในเวลาสั้นๆ ช่วยให้ทำข้อสอบทันเวลาทุกข้อ"</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="assets/js/api.js"></script>
+  <script src="assets/js/cart.js"></script>
+  <script src="assets/js/ui.js"></script>
+  <script src="assets/js/main.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const params = new URLSearchParams(location.search);
+      const back = params.get('back') || 'my-courses.html';
+      // If already logged in, redirect.
+      if (HBN.api.isLoggedIn()) location.href = back;
+
+      // Auto-switch to signup tab if /login.html#signup
+      if (location.hash === '#signup') {
+        document.querySelector('[data-tab="signup"]')?.click();
+      }
+
+      document.getElementById('signinForm')?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const fd = new FormData(e.target);
+        const btn = document.getElementById('signinBtn');
+        btn.disabled = true; btn.textContent = 'กำลังเข้าระบบ...';
+        try {
+          await HBN.api.login({
+            email: fd.get('email').toString().trim().toLowerCase(),
+            password: fd.get('password'),
+          });
+          HBN.ui.toast('เข้าสู่ระบบสำเร็จ', 'success');
+          setTimeout(() => location.href = back, 400);
+        } catch (err) {
+          HBN.ui.toast(err.message, 'error');
+          btn.disabled = false; btn.textContent = 'เข้าสู่ระบบ';
+        }
+      });
+
+      document.getElementById('signupForm')?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const fd = new FormData(e.target);
+        if (!fd.get('pdpaConsent')) {
+          return HBN.ui.toast('ต้องยอมรับ PDPA ก่อนสมัคร', 'error');
+        }
+        const btn = document.getElementById('signupBtn');
+        btn.disabled = true; btn.textContent = 'กำลังสมัคร...';
+        try {
+          await HBN.api.register({
+            email: fd.get('email').toString().trim().toLowerCase(),
+            password: fd.get('password'),
+            fullName: fd.get('fullName').toString().trim(),
+            phone: fd.get('phone')?.toString() || undefined,
+            pdpaConsent: true,
+            pdpaVersion: 'v1',
+          });
+          HBN.ui.toast('สมัครสำเร็จ ยินดีต้อนรับ! 🎉', 'success');
+          setTimeout(() => location.href = back, 400);
+        } catch (err) {
+          HBN.ui.toast(err.message, 'error');
+          btn.disabled = false; btn.textContent = 'สมัครสมาชิก';
+        }
+      });
+    });
+  </script>
+</body>
+</html>

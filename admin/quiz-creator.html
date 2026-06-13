@@ -1,0 +1,473 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>แอดมิน — สร้างข้อสอบ | HighBrainnet</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=Sarabun:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <link rel="stylesheet" href="../assets/css/styles.css" />
+</head>
+<body class="bg-slate-100">
+
+  <div class="min-h-screen flex">
+    <aside class="w-64 bg-slate-900 text-white flex-shrink-0 hidden lg:flex flex-col">
+      <a href="dashboard.html" class="flex items-center gap-2 p-5 border-b border-slate-800">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-orange-400 to-orange-600 grid place-items-center text-white font-extrabold">H</div>
+        <div><div class="font-bold">HighBrainnet</div><div class="text-xs text-slate-400">แอดมิน</div></div>
+      </a>
+      <nav class="sidenav flex-1 p-3 space-y-1 text-sm">
+        <a href="dashboard.html"><i data-lucide="layout-dashboard" class="w-4 h-4"></i> ภาพรวม</a>
+        <a href="courses.html"><i data-lucide="book-open" class="w-4 h-4"></i> จัดการคอร์ส</a>
+        <a href="course-edit.html"><i data-lucide="file-edit" class="w-4 h-4"></i> สร้าง / แก้ไขคอร์ส</a>
+        <a href="payments.html"><i data-lucide="banknote" class="w-4 h-4"></i> ตรวจสอบการชำระเงิน</a>
+        <a href="quiz-creator.html" class="active"><i data-lucide="clipboard-list" class="w-4 h-4"></i> สร้างข้อสอบ</a>
+      </nav>
+      <a href="#" data-logout class="m-3 btn btn-ghost text-slate-300 text-sm"><i data-lucide="log-out" class="w-4 h-4"></i> ออกจากระบบ</a>
+    </aside>
+
+    <div class="flex-1 min-w-0">
+      <header class="bg-white border-b border-slate-200 sticky top-0 z-30">
+        <div class="px-6 flex items-center justify-between h-16">
+          <h1 id="pageTitle" class="font-bold text-lg truncate">สร้างข้อสอบ</h1>
+          <div class="flex items-center gap-3 flex-shrink-0">
+            <button id="deleteQuizBtn" class="btn btn-ghost text-sm text-red-500" style="display:none"><i data-lucide="trash-2" class="w-4 h-4"></i> ลบข้อสอบทั้งชุด</button>
+            <span id="quizStateBadge" class="badge badge-gray">ยังไม่ได้สร้าง</span>
+          </div>
+        </div>
+      </header>
+
+      <main class="p-6 grid lg:grid-cols-[1fr_320px] gap-6">
+
+        <div class="grid gap-5">
+          <!-- META -->
+          <div class="card p-6">
+            <h3 class="font-bold mb-4">ข้อมูล Quiz</h3>
+            <form id="metaForm" class="grid sm:grid-cols-2 gap-4">
+              <div class="sm:col-span-2">
+                <label class="text-sm font-semibold mb-1 block">ชื่อแบบทดสอบ</label>
+                <input name="title" required class="w-full px-3 py-2 rounded-lg border border-slate-200" placeholder="เช่น Quiz ท้ายบท: จำนวนเต็ม"/>
+              </div>
+              <div class="sm:col-span-2">
+                <label class="text-sm font-semibold mb-1 block">แนบกับ</label>
+                <div class="flex flex-wrap gap-4 text-sm">
+                  <label class="flex items-center gap-2"><input type="radio" name="attach" value="lesson" class="accent-orange-500" checked/> ท้ายบทเรียน (Quiz)</label>
+                  <label class="flex items-center gap-2"><input type="radio" name="attach" value="course" class="accent-orange-500"/> ระดับคอร์ส (Mock Exam)</label>
+                </div>
+              </div>
+              <div>
+                <label class="text-sm font-semibold mb-1 block">คอร์ส</label>
+                <select name="courseId" id="courseSelect" required class="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm"></select>
+              </div>
+              <div id="lessonWrap">
+                <label class="text-sm font-semibold mb-1 block">บทเรียน</label>
+                <select name="lessonId" id="lessonSelect" class="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm"></select>
+              </div>
+              <label class="flex items-center gap-2 text-sm sm:col-span-2" id="preLessonWrap">
+                <input type="checkbox" name="isPreLesson" class="accent-orange-500"/> เป็นแบบทดสอบ <strong>ก่อนเรียน</strong> (pre-lesson)
+              </label>
+              <label class="flex items-center gap-2 text-sm sm:col-span-2">
+                <input type="checkbox" name="hasTimer" id="hasTimer" class="accent-orange-500"/> จับเวลา
+              </label>
+              <div id="timerWrap" style="display:none">
+                <label class="text-sm font-semibold mb-1 block">เวลาทำ (นาที)</label>
+                <input name="timeLimitMinutes" type="number" min="1" max="600" class="w-full px-3 py-2 rounded-lg border border-slate-200" value="15"/>
+              </div>
+              <div>
+                <label class="text-sm font-semibold mb-1 block">เกณฑ์ผ่าน (%)</label>
+                <input name="passScore" type="number" min="0" max="100" class="w-full px-3 py-2 rounded-lg border border-slate-200" value="60"/>
+              </div>
+              <div class="sm:col-span-2">
+                <button type="submit" id="metaSubmit" class="btn btn-primary"><i data-lucide="save" class="w-4 h-4"></i> สร้างข้อสอบ</button>
+              </div>
+            </form>
+          </div>
+
+          <!-- QUESTIONS (after quiz exists) -->
+          <div id="questionsCard" class="grid gap-5" style="display:none">
+            <div id="questionsList" class="grid gap-4"></div>
+
+            <!-- Add-question form -->
+            <div class="card p-6">
+              <h3 class="font-bold mb-4">เพิ่มคำถาม</h3>
+              <form id="questionForm" class="grid gap-4">
+                <div>
+                  <label class="text-sm font-semibold mb-1 block">ประเภท</label>
+                  <select name="type" id="qType" class="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm">
+                    <option value="MULTIPLE_CHOICE">ปรนัย (เลือกตอบ)</option>
+                    <option value="TRUE_FALSE">ถูก / ผิด</option>
+                    <option value="SHORT_ANSWER">เติมคำตอบสั้น</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="text-sm font-semibold mb-1 block">โจทย์</label>
+                  <textarea name="prompt" rows="2" required class="w-full px-3 py-2 rounded-lg border border-slate-200"></textarea>
+                </div>
+
+                <!-- MULTIPLE_CHOICE options -->
+                <div id="mcBlock">
+                  <label class="text-sm font-semibold mb-2 block">ตัวเลือก (เลือกข้อที่ถูก)</label>
+                  <div id="optionsWrap" class="space-y-2"></div>
+                  <button type="button" id="addOptionBtn" class="btn btn-ghost text-sm mt-2"><i data-lucide="plus" class="w-4 h-4"></i> เพิ่มตัวเลือก</button>
+                </div>
+
+                <!-- TRUE_FALSE -->
+                <div id="tfBlock" style="display:none">
+                  <label class="text-sm font-semibold mb-2 block">คำตอบที่ถูก</label>
+                  <div class="flex gap-4 text-sm">
+                    <label class="flex items-center gap-2"><input type="radio" name="tfAnswer" value="true" class="accent-orange-500" checked/> ถูก</label>
+                    <label class="flex items-center gap-2"><input type="radio" name="tfAnswer" value="false" class="accent-orange-500"/> ผิด</label>
+                  </div>
+                </div>
+
+                <!-- SHORT_ANSWER -->
+                <div id="saBlock" style="display:none">
+                  <label class="text-sm font-semibold mb-1 block">คำตอบที่ถูก</label>
+                  <input name="saAnswer" class="w-full px-3 py-2 rounded-lg border border-slate-200"/>
+                </div>
+
+                <div class="grid sm:grid-cols-2 gap-4">
+                  <div>
+                    <label class="text-sm font-semibold mb-1 block">คะแนน</label>
+                    <input name="points" type="number" min="1" max="100" value="1" class="w-full px-3 py-2 rounded-lg border border-slate-200"/>
+                  </div>
+                </div>
+                <div>
+                  <label class="text-sm font-semibold mb-1 block">คำอธิบายเฉลย</label>
+                  <textarea name="explanation" rows="2" class="w-full px-3 py-2 rounded-lg border border-slate-200"></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary"><i data-lucide="plus" class="w-4 h-4"></i> เพิ่มคำถาม</button>
+              </form>
+            </div>
+          </div>
+        </div>
+
+        <!-- Sidebar -->
+        <aside class="grid gap-5 h-fit">
+          <div class="card p-5">
+            <h3 class="font-bold mb-3">สรุป</h3>
+            <ul class="text-sm space-y-2 text-slate-600">
+              <li class="flex justify-between"><span>คำถามทั้งหมด</span><strong id="sumQuestions">—</strong></li>
+              <li class="flex justify-between"><span>คะแนนเต็ม</span><strong id="sumPoints">—</strong></li>
+              <li class="flex justify-between"><span>จับเวลา</span><strong id="sumTimer">—</strong></li>
+              <li class="flex justify-between"><span>เกณฑ์ผ่าน</span><strong id="sumPass">—</strong></li>
+            </ul>
+          </div>
+          <div class="card p-5 text-sm text-slate-500">
+            <p>หลังสร้างข้อสอบแล้ว ส่วน “เพิ่มคำถาม” จะปรากฏด้านล่าง สามารถเพิ่ม/ลบคำถามได้ทันที</p>
+          </div>
+        </aside>
+
+      </main>
+    </div>
+  </div>
+
+  <script>window.HBN_API_BASE = window.HBN_API_BASE || 'http://localhost:4000';</script>
+  <script src="../assets/js/api.js"></script>
+  <script src="../assets/js/cart.js"></script>
+  <script src="../assets/js/ui.js"></script>
+  <script src="../assets/js/main.js"></script>
+  <script>
+    (async function () {
+      const user = HBN.api.currentUser();
+      if (!user || user.role !== 'ADMIN') {
+        location.href = '../login.html?back=' + encodeURIComponent('admin/quiz-creator.html');
+        return;
+      }
+      const esc = (s = '') => String(s).replace(/[&<>"]/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+      const $ = (id) => document.getElementById(id);
+
+      let quizId = new URLSearchParams(location.search).get('quizId') || null;
+
+      const metaForm = $('metaForm');
+      const courseSelect = $('courseSelect');
+      const lessonSelect = $('lessonSelect');
+
+      // ---------- courses ----------
+      const { items: courses } = await HBN.api.get('/admin/courses?includeHidden=true&take=100');
+      courseSelect.innerHTML = courses.length
+        ? courses.map((c) => `<option value="${c.id}">${esc(c.title)}</option>`).join('')
+        : '<option value="">— ยังไม่มีคอร์ส —</option>';
+
+      // ---------- lessons of selected course ----------
+      async function loadLessons() {
+        const cid = courseSelect.value;
+        lessonSelect.innerHTML = '<option value="">กำลังโหลด...</option>';
+        if (!cid) { lessonSelect.innerHTML = '<option value="">—</option>'; return; }
+        try {
+          const { items: chapters } = await HBN.api.get(`/admin/courses/${cid}/chapters`);
+          const groups = [];
+          for (const ch of chapters) {
+            const { items: lessons } = await HBN.api.get(`/admin/chapters/${ch.id}/lessons`);
+            if (lessons.length) {
+              groups.push(`<optgroup label="${esc(ch.title)}">` +
+                lessons.map((l) => `<option value="${l.id}">${esc(l.title)}</option>`).join('') +
+                `</optgroup>`);
+            }
+          }
+          lessonSelect.innerHTML = groups.length ? groups.join('') : '<option value="">— ยังไม่มีบทเรียน —</option>';
+        } catch (e) {
+          lessonSelect.innerHTML = `<option value="">โหลดไม่สำเร็จ</option>`;
+        }
+      }
+      courseSelect.addEventListener('change', loadLessons);
+
+      // ---------- attach mode toggles ----------
+      function attachMode() { return metaForm.attach.value; }
+      function syncAttachUI() {
+        const lesson = attachMode() === 'lesson';
+        $('lessonWrap').style.display = lesson ? '' : 'none';
+        $('preLessonWrap').style.display = lesson ? '' : 'none';
+      }
+      metaForm.querySelectorAll('input[name="attach"]').forEach((r) => r.addEventListener('change', syncAttachUI));
+      $('hasTimer').addEventListener('change', (e) => { $('timerWrap').style.display = e.target.checked ? '' : 'none'; });
+
+      // ---------- create / save quiz meta ----------
+      function metaPayload() {
+        const fd = new FormData(metaForm);
+        const hasTimer = fd.get('hasTimer') === 'on';
+        const payload = {
+          title: fd.get('title'),
+          hasTimer,
+          passScore: fd.get('passScore') ? Number(fd.get('passScore')) : undefined,
+          isMockExam: attachMode() === 'course',
+          isPreLesson: attachMode() === 'lesson' && fd.get('isPreLesson') === 'on',
+        };
+        if (hasTimer) payload.timeLimitMinutes = Number(fd.get('timeLimitMinutes'));
+        return payload;
+      }
+
+      metaForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const payload = metaPayload();
+        try {
+          if (!quizId) {
+            let res;
+            if (attachMode() === 'lesson') {
+              const lessonId = lessonSelect.value;
+              if (!lessonId) return HBN.ui.toast('กรุณาเลือกบทเรียน', 'error');
+              res = await HBN.api.post(`/admin/lessons/${lessonId}/quizzes`, payload);
+            } else {
+              const cid = courseSelect.value;
+              if (!cid) return HBN.ui.toast('กรุณาเลือกคอร์ส', 'error');
+              res = await HBN.api.post(`/admin/courses/${cid}/quizzes`, payload);
+            }
+            quizId = res.quiz.id;
+            history.replaceState(null, '', `?quizId=${quizId}`);
+            HBN.ui.toast('สร้างข้อสอบแล้ว 🎉 เพิ่มคำถามได้เลย', 'success');
+            enterEditMode();
+          } else {
+            await HBN.api.patch(`/admin/quizzes/${quizId}`, payload);
+            HBN.ui.toast('บันทึกการตั้งค่าแล้ว ✅', 'success');
+            await loadQuiz();
+          }
+        } catch (err) { HBN.ui.toast(err.message, 'error'); }
+      });
+
+      // ---------- edit mode ----------
+      function enterEditMode() {
+        $('questionsCard').style.display = '';
+        $('metaSubmit').innerHTML = '<i data-lucide="save" class="w-4 h-4"></i> บันทึกการตั้งค่า';
+        $('quizStateBadge').className = 'badge badge-green';
+        $('quizStateBadge').textContent = 'บันทึกแล้ว';
+        $('deleteQuizBtn').style.display = '';
+        // lock attach target after creation
+        courseSelect.disabled = true;
+        lessonSelect.disabled = true;
+        metaForm.querySelectorAll('input[name="attach"]').forEach((r) => (r.disabled = true));
+        window.lucide?.createIcons();
+        loadQuiz();
+      }
+
+      function resetToCreateMode() {
+        quizId = null;
+        history.replaceState(null, '', location.pathname);
+        $('questionsCard').style.display = 'none';
+        $('deleteQuizBtn').style.display = 'none';
+        $('quizStateBadge').className = 'badge badge-gray';
+        $('quizStateBadge').textContent = 'ยังไม่ได้สร้าง';
+        $('metaSubmit').innerHTML = '<i data-lucide="save" class="w-4 h-4"></i> สร้างข้อสอบ';
+        $('pageTitle').textContent = 'สร้างข้อสอบ';
+        courseSelect.disabled = false;
+        lessonSelect.disabled = false;
+        metaForm.querySelectorAll('input[name="attach"]').forEach((r) => (r.disabled = false));
+        window.lucide?.createIcons();
+        loadLessons();
+      }
+
+      $('deleteQuizBtn').addEventListener('click', async () => {
+        if (!quizId) return;
+        if (!confirm('ลบข้อสอบทั้งชุดและคำถามทั้งหมด? การกระทำนี้ย้อนกลับไม่ได้')) return;
+        try {
+          await HBN.api.del(`/admin/quizzes/${quizId}`);
+          HBN.ui.toast('ลบข้อสอบแล้ว — กลับสู่หน้าสร้างใหม่', 'success');
+          setTimeout(() => (location.href = 'quiz-creator.html'), 800);
+        } catch (e) { HBN.ui.toast(e.message, 'error'); }
+      });
+
+      // ---------- render questions + summary ----------
+      function renderQuestion(q, idx) {
+        let body = '';
+        if (q.type === 'MULTIPLE_CHOICE' && Array.isArray(q.options)) {
+          body = '<div class="mt-2 space-y-1 text-sm">' + q.options.map((o) =>
+            `<div class="flex items-center gap-2 ${o.key === q.correctAnswer ? 'text-green-700 font-semibold' : 'text-slate-600'}">
+               <span class="w-5">${o.key === q.correctAnswer ? '✓' : ''}</span>
+               <span class="font-mono text-xs">${esc(o.key)}.</span> ${esc(o.text)}
+             </div>`).join('') + '</div>';
+        } else if (q.type === 'TRUE_FALSE') {
+          body = `<div class="mt-2 text-sm text-green-700 font-semibold">เฉลย: ${q.correctAnswer === true || q.correctAnswer === 'true' ? 'ถูก' : 'ผิด'}</div>`;
+        } else {
+          body = `<div class="mt-2 text-sm text-green-700 font-semibold">เฉลย: ${esc(q.correctAnswer)}</div>`;
+        }
+        return `
+          <div class="card p-5">
+            <div class="flex items-start justify-between gap-3">
+              <div class="min-w-0">
+                <div class="flex items-center gap-2 mb-1">
+                  <span class="badge badge-blue">ข้อ ${idx + 1}</span>
+                  <span class="text-xs text-slate-400">${q.points} คะแนน</span>
+                </div>
+                <div class="font-semibold">${esc(q.prompt)}</div>
+              </div>
+              <button data-del-q="${q.id}" class="text-red-500 hover:bg-red-50 w-8 h-8 rounded grid place-items-center flex-shrink-0"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+            </div>
+            ${body}
+            ${q.explanation ? `<div class="mt-2 text-xs text-slate-500 border-t border-slate-100 pt-2">💡 ${esc(q.explanation)}</div>` : ''}
+          </div>`;
+      }
+
+      async function loadQuiz() {
+        let quiz;
+        try {
+          ({ quiz } = await HBN.api.get(`/admin/quizzes/${quizId}`));
+        } catch (e) {
+          HBN.ui.toast('ไม่พบข้อสอบนี้ (อาจถูกลบแล้ว) — กลับสู่หน้าสร้างใหม่', 'error');
+          resetToCreateMode();
+          return;
+        }
+        $('pageTitle').textContent = 'แก้ไขข้อสอบ: ' + quiz.title;
+        // fill meta form to match stored values
+        metaForm.title.value = quiz.title || '';
+        metaForm.attach.value = quiz.lessonId ? 'lesson' : 'course';
+        metaForm.querySelector(`input[name="attach"][value="${quiz.lessonId ? 'lesson' : 'course'}"]`).checked = true;
+        $('hasTimer').checked = !!quiz.hasTimer;
+        $('timerWrap').style.display = quiz.hasTimer ? '' : 'none';
+        if (quiz.timeLimitMinutes) metaForm.timeLimitMinutes.value = quiz.timeLimitMinutes;
+        if (quiz.passScore != null) metaForm.passScore.value = quiz.passScore;
+        metaForm.isPreLesson.checked = !!quiz.isPreLesson;
+        syncAttachUI();
+
+        const qs = quiz.questions || [];
+        $('questionsList').innerHTML = qs.length
+          ? qs.map(renderQuestion).join('')
+          : '<div class="card p-6 text-center text-slate-400">ยังไม่มีคำถาม — เพิ่มคำถามแรกด้านล่าง</div>';
+        // summary
+        $('sumQuestions').textContent = qs.length + ' ข้อ';
+        $('sumPoints').textContent = qs.reduce((s, q) => s + (q.points || 0), 0) + ' คะแนน';
+        $('sumTimer').textContent = quiz.hasTimer ? `${quiz.timeLimitMinutes} นาที` : 'ไม่จับเวลา';
+        $('sumPass').textContent = quiz.passScore != null ? quiz.passScore + '%' : '—';
+        window.lucide?.createIcons();
+
+        $('questionsList').querySelectorAll('[data-del-q]').forEach((b) => b.onclick = async () => {
+          if (!confirm('ลบคำถามนี้?')) return;
+          try { await HBN.api.del(`/admin/questions/${b.dataset.delQ}`); HBN.ui.toast('ลบแล้ว', 'success'); loadQuiz(); }
+          catch (e) { HBN.ui.toast(e.message, 'error'); }
+        });
+      }
+
+      // ---------- question form (type switching + options) ----------
+      const optionsWrap = $('optionsWrap');
+      function optionRow(key) {
+        const div = document.createElement('div');
+        div.className = 'flex items-center gap-3';
+        div.dataset.opt = key;
+        div.innerHTML = `
+          <input type="radio" name="correctOpt" value="${key}" class="accent-orange-500" ${key === 'A' ? 'checked' : ''}/>
+          <span class="font-mono text-xs w-4">${key}</span>
+          <input data-opt-text class="flex-1 px-3 py-2 rounded-lg border border-slate-200" placeholder="ตัวเลือก ${key}"/>
+          <button type="button" data-rm-opt class="w-8 h-8 grid place-items-center rounded hover:bg-red-50 text-red-400"><i data-lucide="x" class="w-4 h-4"></i></button>`;
+        return div;
+      }
+      function renumberOptions() {
+        [...optionsWrap.children].forEach((row, i) => {
+          const key = String.fromCharCode(65 + i);
+          row.dataset.opt = key;
+          row.querySelector('input[name="correctOpt"]').value = key;
+          row.querySelector('span').textContent = key;
+          row.querySelector('[data-opt-text]').placeholder = 'ตัวเลือก ' + key;
+        });
+      }
+      function resetOptions() {
+        optionsWrap.innerHTML = '';
+        ['A', 'B', 'C', 'D'].forEach((k) => optionsWrap.appendChild(optionRow(k)));
+        window.lucide?.createIcons();
+      }
+      optionsWrap.addEventListener('click', (e) => {
+        const btn = e.target.closest('[data-rm-opt]');
+        if (!btn) return;
+        if (optionsWrap.children.length <= 2) return HBN.ui.toast('ต้องมีอย่างน้อย 2 ตัวเลือก', 'error');
+        btn.closest('[data-opt]').remove();
+        renumberOptions();
+      });
+      $('addOptionBtn').addEventListener('click', () => {
+        if (optionsWrap.children.length >= 8) return HBN.ui.toast('สูงสุด 8 ตัวเลือก', 'error');
+        const key = String.fromCharCode(65 + optionsWrap.children.length);
+        optionsWrap.appendChild(optionRow(key));
+        window.lucide?.createIcons();
+      });
+      $('qType').addEventListener('change', (e) => {
+        const t = e.target.value;
+        $('mcBlock').style.display = t === 'MULTIPLE_CHOICE' ? '' : 'none';
+        $('tfBlock').style.display = t === 'TRUE_FALSE' ? '' : 'none';
+        $('saBlock').style.display = t === 'SHORT_ANSWER' ? '' : 'none';
+      });
+      resetOptions();
+
+      $('questionForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        if (!quizId) return;
+        const fd = new FormData(e.target);
+        const type = fd.get('type');
+        const payload = {
+          type,
+          prompt: fd.get('prompt'),
+          points: Number(fd.get('points')) || 1,
+          explanation: fd.get('explanation') || undefined,
+        };
+        if (type === 'MULTIPLE_CHOICE') {
+          const opts = [...optionsWrap.children].map((row) => ({
+            key: row.dataset.opt,
+            text: row.querySelector('[data-opt-text]').value.trim(),
+          }));
+          if (opts.some((o) => !o.text)) return HBN.ui.toast('กรอกข้อความให้ครบทุกตัวเลือก', 'error');
+          payload.options = opts;
+          payload.correctAnswer = fd.get('correctOpt');
+        } else if (type === 'TRUE_FALSE') {
+          payload.correctAnswer = fd.get('tfAnswer') === 'true';
+        } else {
+          const ans = (fd.get('saAnswer') || '').trim();
+          if (!ans) return HBN.ui.toast('กรอกคำตอบที่ถูก', 'error');
+          payload.correctAnswer = ans;
+        }
+        try {
+          await HBN.api.post(`/admin/quizzes/${quizId}/questions`, payload);
+          HBN.ui.toast('เพิ่มคำถามแล้ว ✅', 'success');
+          e.target.reset();
+          $('qType').dispatchEvent(new Event('change'));
+          resetOptions();
+          loadQuiz();
+        } catch (err) { HBN.ui.toast(err.message, 'error'); }
+      });
+
+      // ---------- init ----------
+      syncAttachUI();
+      if (quizId) {
+        enterEditMode();
+      } else {
+        await loadLessons();
+      }
+    })();
+  </script>
+</body>
+</html>
