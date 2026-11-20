@@ -132,9 +132,4 @@ the register API + admin enrollment to exercise student pages, then delete all o
 rows (orders, payments, quiz attempts/results, badges, enrollment, user) to leave the dev DB at
 baseline. Don't commit test data.
 
-## Git / GitHub
 
-- Remote: `https://github.com/Bahruddeen4214/e-Learning` (private). Branch: `master`.
-- `.gitignore` excludes `node_modules/`, `.env`, `.DS_Store`, `**/.claude/settings.local.json`.
-  Never commit `backend/.env` (real secrets) — `.env.example` is the template.
-- Commit/push only when asked.
