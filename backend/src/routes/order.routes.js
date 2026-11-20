@@ -7,6 +7,7 @@ const {
   createOrderSchema,
   orderIdParam,
   listOrdersQuerySchema,
+  submitSlipSchema,
 } = require('../validators/order.validators');
 
 const router = express.Router();
@@ -18,6 +19,11 @@ router.get('/',  validate(listOrdersQuerySchema, 'query'), orderCtrl.list);
 router.get('/:id', validate(orderIdParam, 'params'), orderCtrl.get);
 
 router.post('/:id/payment', validate(orderIdParam, 'params'), paymentCtrl.start);
+router.post('/:id/slip',
+  validate(orderIdParam, 'params'),
+  validate(submitSlipSchema),
+  paymentCtrl.submitSlip,
+);
 
 const certificateCtrl = require('../controllers/certificate.controller');
 router.get('/:id/receipt.pdf', validate(orderIdParam, 'params'), certificateCtrl.receiptPdf);

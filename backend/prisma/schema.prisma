@@ -57,6 +57,22 @@ enum ExamCreditDisplay {
   ALIAS
 }
 
+enum PaymentMode {
+  MANUAL // admin checks slip + approves
+  AUTO   // slip auto-verified via provider API
+}
+
+enum QrSource {
+  PROMPTPAY // QR generated locally from admin's PromptPay id
+  GBP       // QR via GB Prime Pay gateway
+}
+
+enum PromptPayIdType {
+  PHONE    // 0xxxxxxxxx
+  CITIZEN  // 13-digit national id / tax id
+  EWALLET  // 15-digit e-wallet id
+}
+
 // ============================================================
 //  USERS
 // ============================================================
@@ -471,7 +487,8 @@ model Payment {
   gatewayRef     String?       @unique @map("gateway_ref")
   webhookPayload Json?         @map("webhook_payload")
   paidAt         DateTime?     @map("paid_at")
-  slipImageUrl   String?       @map("slip_image_url") // manual approval
+  slipImageUrl   String?       @map("slip_image_url") // manual approval / slip upload
+  slipVerifyResult Json?       @map("slip_verify_result") // provider response when auto-verified
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -585,4 +602,37 @@ model AuditLog {
   @@index([userId])
   @@index([entity, entityId])
   @@map("audit_logs")
+}
+
+// ============================================================
+//  APP SETTINGS (singleton — id is always 1)
+//  Admin-configurable payment settings: PromptPay/bank details
+//  and whether incoming payments are checked manually or auto-
+//  verified via a slip-verification provider.
+// ============================================================
+model AppSetting {
+  id Int @id @default(1)
+
+  // How payments are confirmed
+  paymentMode PaymentMode @default(MANUAL) @map("payment_mode")
+  qrSource    QrSource    @default(PROMPTPAY) @map("qr_source")
+
+  // PromptPay (used to generate the QR locally)
+  promptpayId     String?         @map("promptpay_id")
+  promptpayType   PromptPayIdType @default(PHONE) @map("promptpay_type")
+  promptpayName   String?         @map("promptpay_name") // display name shown to students
+
+  // Bank account (shown for manual transfer)
+  bankName        String? @map("bank_name")
+  bankAccountNo   String? @map("bank_account_no")
+  bankAccountName String? @map("bank_account_name")
+
+  // Slip verification provider (used when paymentMode = AUTO)
+  slipProvider String? @map("slip_provider") // mock | easyslip | slipok
+  slipApiKey   String? @map("slip_api_key")  // secret — never sent to the client
+
+  updatedAt   DateTime @updatedAt @map("updated_at")
+  updatedById String?  @map("updated_by_id") @db.Uuid
+
+  @@map("app_settings")
 }

@@ -41,6 +41,20 @@ async function main() {
     },
   });
   console.log(`✅ Admin ready: ${adminEmail} (password: ${adminPass})`);
+
+  // ----- App settings (singleton row id=1) -----
+  await prisma.appSetting.upsert({
+    where: { id: 1 },
+    update: {},
+    create: {
+      id: 1,
+      paymentMode: 'MANUAL',
+      qrSource: 'PROMPTPAY',
+      promptpayType: 'PHONE',
+      slipProvider: 'mock',
+    },
+  });
+  console.log('✅ App settings ready (paymentMode=MANUAL, qrSource=PROMPTPAY)');
 }
 
 main()

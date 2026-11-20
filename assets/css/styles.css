@@ -1,13 +1,18 @@
 /* ===========================================================
    HighBrainnet — Design System v2
    =========================================================== */
+@import url('https://fonts.googleapis.com/css2?family=Kanit:wght@500;600;700;800&display=swap');
+
 :root {
-  /* Brand */
-  --brand:        #f97316;
-  --brand-dark:   #ea580c;
-  --brand-deeper: #c2410c;
-  --brand-soft:   #fff7ed;
-  --brand-glow:   rgba(249,115,22,.20);
+  /* Brand — HighBrainnet Blue (#85B2D5)
+     --brand        : light identity tone (accents, soft fills, borders, on dark surfaces)
+     --brand-dark   : mid (hover, gradient mid)
+     --brand-deeper : deep, AA-readable — solid fills w/ white text, prices, emphasis */
+  --brand:        #85B2D5;
+  --brand-dark:   #4f86b5;
+  --brand-deeper: #2f5f88;
+  --brand-soft:   #eef6fb;
+  --brand-glow:   rgba(133,178,213,.30);
 
   /* Ink (text) */
   --ink-900: #0b1220;
@@ -28,7 +33,7 @@
   --shadow-md: 0 6px 16px -6px rgba(15,23,42,.10), 0 2px 4px rgba(15,23,42,.04);
   --shadow-lg: 0 16px 40px -16px rgba(15,23,42,.18), 0 4px 12px -4px rgba(15,23,42,.06);
   --shadow-xl: 0 28px 60px -20px rgba(15,23,42,.22), 0 10px 22px -8px rgba(15,23,42,.08);
-  --shadow-brand: 0 18px 36px -14px rgba(249,115,22,.40), 0 6px 14px -6px rgba(249,115,22,.20);
+  --shadow-brand: 0 18px 36px -14px rgba(47,95,136,.42), 0 6px 14px -6px rgba(47,95,136,.24);
 
   /* Radii */
   --r-sm: .5rem;
@@ -42,25 +47,44 @@
 /* ----------------- Reset / base ----------------- */
 html { scroll-behavior: smooth; -webkit-font-smoothing: antialiased; }
 body {
-  font-family: 'IBM Plex Sans Thai', 'Sarabun', 'Noto Sans Thai', system-ui, sans-serif;
+  font-family: 'Sarabun', 'IBM Plex Sans Thai', 'Noto Sans Thai', system-ui, sans-serif;
   color: var(--ink-900);
   background: var(--surface-2);
   font-feature-settings: "ss01" on, "cv11" on;
-  line-height: 1.55;
+  line-height: 1.6;
+  font-size: 15px;            /* base ≥14px, comfortable for younger students */
+}
+/* Headings use Kanit (brand spec) for a modern, distinct look */
+h1, h2, h3, h4, .font-display {
+  font-family: 'Kanit', 'IBM Plex Sans Thai', sans-serif;
+  letter-spacing: -.01em;
 }
 *::selection { background: var(--brand-glow); color: var(--brand-deeper); }
 
-/* ----------------- Brand utility ----------------- */
-.text-brand { color: var(--brand); }
-.bg-brand { background-color: var(--brand); }
-.bg-brand:hover { background-color: var(--brand-dark); }
+/* Keyboard-accessible focus ring (a11y) */
+:focus-visible {
+  outline: 2.5px solid var(--brand-deeper);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+:focus:not(:focus-visible) { outline: none; }
+
+/* ----------------- Brand utility -----------------
+   text/bg/border use the DEEP brand so white text & on-white emphasis stay
+   AA-readable. The light identity tone (#85B2D5) lives in --brand and is used
+   for soft fills, the logo gradient (orange→blue scale) and on dark surfaces. */
+.text-brand { color: var(--brand-deeper); }
+.bg-brand { background-color: var(--brand-deeper); }
+.bg-brand:hover { background-color: #264e70; }
 .bg-brand-soft { background-color: var(--brand-soft); }
-.border-brand { border-color: var(--brand); }
-.ring-brand { --tw-ring-color: var(--brand); }
+.border-brand { border-color: var(--brand-deeper); }
+.ring-brand { --tw-ring-color: var(--brand-deeper); }
+/* Keep footer links light on the dark footer (they invert on hover) */
+footer a:hover { color: #9cc3e0 !important; }
 
 /* Decorative gradient text */
 .text-gradient {
-  background: linear-gradient(135deg, #fb923c 0%, #f97316 50%, #ea580c 100%);
+  background: linear-gradient(135deg, #a7cae4 0%, #85B2D5 50%, #5E92BC 100%);
   -webkit-background-clip: text; background-clip: text; color: transparent;
 }
 
@@ -78,6 +102,7 @@ body {
 .btn {
   display: inline-flex; align-items: center; justify-content: center; gap: .5rem;
   padding: .7rem 1.4rem;
+  min-height: 2.75rem;            /* 44px touch target (CONTEXT 3.8) */
   border-radius: var(--r-md);
   font-weight: 600;
   font-size: .95rem;
@@ -89,11 +114,11 @@ body {
 }
 .btn:active { transform: translateY(1px); }
 .btn-primary {
-  background: linear-gradient(135deg, #fb923c 0%, #f97316 60%, #ea580c 100%);
+  background: linear-gradient(135deg, var(--brand-dark) 0%, var(--brand-deeper) 100%);
   color: #fff;
   box-shadow: var(--shadow-brand);
 }
-.btn-primary:hover { box-shadow: 0 22px 44px -16px rgba(249,115,22,.55), 0 8px 16px -6px rgba(249,115,22,.25); transform: translateY(-1px); }
+.btn-primary:hover { box-shadow: 0 22px 44px -16px rgba(47,95,136,.50), 0 8px 16px -6px rgba(47,95,136,.28); transform: translateY(-1px); }
 .btn-outline {
   border: 1.5px solid var(--brand);
   color: var(--brand);
@@ -106,8 +131,8 @@ body {
   background: var(--ink-900); color: #fff;
 }
 .btn-dark:hover { background: #1f2937; transform: translateY(-1px); }
-.btn-sm { padding: .5rem 1rem; font-size: .85rem; }
-.btn-lg { padding: .95rem 1.75rem; font-size: 1rem; }
+.btn-sm { padding: .5rem 1rem; min-height: 2.25rem; font-size: .85rem; }
+.btn-lg { padding: .95rem 1.85rem; min-height: 3.25rem; font-size: 1.02rem; }
 
 /* ----------------- Cards ----------------- */
 .card {
@@ -123,7 +148,7 @@ body {
 .card-hover:hover {
   transform: translateY(-4px);
   box-shadow: var(--shadow-lg);
-  border-color: #fed7aa;
+  border-color: #bdd8ec;
 }
 
 /* Course card image zoom */
@@ -143,8 +168,8 @@ body {
   transition: color .2s, border-color .2s, background .2s;
   white-space: nowrap;
 }
-.tab-btn:hover { color: var(--brand); }
-.tab-btn.active { color: var(--brand); border-color: var(--brand); }
+.tab-btn:hover { color: var(--brand-deeper); }
+.tab-btn.active { color: var(--brand-deeper); border-color: var(--brand-deeper); }
 .tab-panel { display: none; }
 .tab-panel.active { display: block; animation: fadeUp .3s cubic-bezier(.2,.7,.2,1); }
 @keyframes fadeUp {
@@ -160,8 +185,8 @@ body {
   background: var(--surface);
   transition: box-shadow .2s, border-color .2s;
 }
-.accordion-item:hover { border-color: #fed7aa; }
-.accordion-item.open { box-shadow: var(--shadow-sm); border-color: #fed7aa; }
+.accordion-item:hover { border-color: #bdd8ec; }
+.accordion-item.open { box-shadow: var(--shadow-sm); border-color: #bdd8ec; }
 .accordion-header {
   width: 100%;
   display: flex; align-items: center; justify-content: space-between;
@@ -188,7 +213,7 @@ body {
   transition: background .15s, padding-left .15s;
 }
 .lesson-row:last-child { border-bottom: none; }
-.lesson-row:hover { background: #fffbf3; padding-left: 1.6rem; }
+.lesson-row:hover { background: #f0f6fb; padding-left: 1.6rem; }
 
 /* ----------------- Badges ----------------- */
 .badge {
@@ -200,7 +225,7 @@ body {
   letter-spacing: .01em;
   line-height: 1.2;
 }
-.badge-orange { background: #ffedd5; color: var(--brand-deeper); }
+.badge-orange { background: #dcebf5; color: var(--brand-deeper); }
 .badge-green  { background: #dcfce7; color: #15803d; }
 .badge-blue   { background: #dbeafe; color: #1d4ed8; }
 .badge-gray   { background: #e2e8f0; color: #334155; }
@@ -220,9 +245,9 @@ body {
 }
 .sidenav a:hover { background: #1e293b; color: #fff; transform: translateX(2px); }
 .sidenav a.active {
-  background: linear-gradient(135deg, var(--brand) 0%, var(--brand-dark) 100%);
+  background: linear-gradient(135deg, var(--brand-dark) 0%, var(--brand-deeper) 100%);
   color: #fff;
-  box-shadow: 0 6px 16px -8px var(--brand-glow);
+  box-shadow: 0 6px 16px -8px rgba(47,95,136,.5);
 }
 
 /* ----------------- Stars ----------------- */
@@ -263,7 +288,7 @@ body {
 }
 .progress-bar {
   height: 100%;
-  background: linear-gradient(90deg, #fb923c, #f97316);
+  background: linear-gradient(90deg, var(--brand) 0%, var(--brand-dark) 100%);
   border-radius: var(--r-pill);
   transition: width .4s cubic-bezier(.2,.7,.2,1);
 }
@@ -274,7 +299,7 @@ body {
   border-radius: var(--r-pill);
   display: flex; align-items: center; justify-content: center;
   font-weight: 800; font-size: 1.1rem;
-  background: linear-gradient(135deg, var(--brand-soft) 0%, #ffedd5 100%);
+  background: linear-gradient(135deg, var(--brand-soft) 0%, #dcebf5 100%);
   color: var(--brand-deeper);
   border: 2px solid var(--brand);
   box-shadow: 0 4px 10px -4px var(--brand-glow);
@@ -305,12 +330,12 @@ body {
   text-transform: uppercase;
   font-size: .72rem;
   font-weight: 700;
-  color: var(--brand);
+  color: var(--brand-deeper);
   letter-spacing: .12em;
   padding: .3rem .75rem;
   background: var(--brand-soft);
   border-radius: var(--r-pill);
-  border: 1px solid #fed7aa;
+  border: 1px solid #bdd8ec;
 }
 
 /* ----------------- Avatar stack ----------------- */
@@ -350,8 +375,7 @@ body {
 .price-main {
   font-weight: 800;
   font-size: 2rem;
-  background: linear-gradient(135deg, #fb923c, #ea580c);
-  -webkit-background-clip: text; background-clip: text; color: transparent;
+  color: var(--brand-deeper);
   letter-spacing: -.02em;
 }
 
@@ -368,8 +392,8 @@ body {
   transition: all .15s;
   cursor: pointer;
 }
-.chip:hover { border-color: var(--brand); color: var(--brand); }
-.chip.active { background: var(--brand); color: #fff; border-color: var(--brand); }
+.chip:hover { border-color: var(--brand); color: var(--brand-deeper); }
+.chip.active { background: var(--brand-deeper); color: #fff; border-color: var(--brand-deeper); }
 
 /* ----------------- Skeleton-style image fallback (kept as decoration) ----------------- */
 .img-shimmer {

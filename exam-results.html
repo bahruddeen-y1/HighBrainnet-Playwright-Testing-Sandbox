@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>ผลสอบนักเรียน — HighBrainnet</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <script>tailwind.config={theme:{extend:{colors:{brand:"#2f5f88",orange:{50:"#f0f6fb",100:"#dcebf5",200:"#bdd8ec",300:"#a7cae4",400:"#85B2D5",500:"#5b97c4",600:"#4f86b5",700:"#3f7099",800:"#335a7e",900:"#274763",950:"#1c3447"}}}}};</script>
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=Sarabun:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <script src="https://unpkg.com/lucide@latest"></script>
   <link rel="stylesheet" href="assets/css/styles.css" />
@@ -30,7 +31,7 @@
   </header>
 
   <!-- HERO -->
-  <section class="bg-gradient-to-br from-orange-500 to-amber-500 text-white">
+  <section class="bg-gradient-to-br from-orange-500 to-orange-600 text-white">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 py-14 text-center">
       <h1 class="text-3xl md:text-4xl font-extrabold flex items-center justify-center gap-3">
         <i data-lucide="trophy" class="w-9 h-9"></i> ผลสอบนักเรียนของเรา
@@ -110,7 +111,7 @@
               <div class="grid sm:grid-cols-2 gap-3">
                 ${byYear[y].map((c) => `
                   <div class="card p-4 flex items-center gap-4 card-hover">
-                    <div class="w-12 h-12 rounded-full bg-gradient-to-br from-orange-400 to-amber-500 text-white grid place-items-center font-extrabold text-lg flex-shrink-0">
+                    <div class="w-12 h-12 rounded-full bg-gradient-to-br from-orange-400 to-orange-600 text-white grid place-items-center font-extrabold text-lg flex-shrink-0">
                       ${esc((c.displayName || 'น')[0])}
                     </div>
                     <div class="min-w-0">

@@ -9,6 +9,11 @@ exports.start = asyncHandler(async (req, res) => {
   res.json(result);
 });
 
+exports.submitSlip = asyncHandler(async (req, res) => {
+  const result = await service.submitSlip(req.user.id, req.params.id, req.body);
+  res.json(result);
+});
+
 exports.webhook = asyncHandler(async (req, res) => {
   const signature = req.get('x-gbpay-signature') || req.body?.signature || '';
   const rawBody = req.rawBody || Buffer.from(JSON.stringify(req.body));

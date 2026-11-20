@@ -40,9 +40,28 @@ const approveSchema = z.object({
   notes: z.string().max(500).optional(),
 });
 
+// Student uploads a payment slip. Accepts a hosted image URL, an inline
+// base64/data-URL image, and/or the QR payload read off the slip. `mock` lets
+// the dev/mock provider simulate outcomes.
+const submitSlipSchema = z
+  .object({
+    imageUrl: z.string().url().max(2000).optional(),
+    imageBase64: z.string().max(8_000_000).optional(), // ~6MB image as data URL
+    payload: z.string().max(1000).optional(),
+    mock: z
+      .object({
+        fail: z.boolean().optional(),
+        amount: z.number().optional(),
+        transRef: z.string().max(120).optional(),
+      })
+      .optional(),
+  })
+  .strict();
+
 module.exports = {
   createOrderSchema,
   orderIdParam,
   listOrdersQuerySchema,
   approveSchema,
+  submitSlipSchema,
 };
